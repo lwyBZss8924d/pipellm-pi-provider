@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/pipellm-pi-provider"><img src="https://img.shields.io/npm/v/pipellm-pi-provider?style=flat-square" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/pipellm-pi-provider"><img src="https://img.shields.io/npm/v/pipellm-pi-provider?style=flat-square&color=blue" alt="npm"></a>
   <a href="https://learn.chatgpt.com/docs/security/sdk"><img src="https://img.shields.io/badge/Codex%20Security%20SDK-0.1.31-1f6feb?style=flat-square" alt="OpenAI Codex Security SDK 0.1.31"></a>
 </p>
 
