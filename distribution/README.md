@@ -10,25 +10,29 @@ includes corresponding sources and tests under `source/`, and bundled CLI depend
 Register the extension with Pi:
 
 ```sh
-pi install npm:pipellm-pi-provider@0.3.1
+pi install npm:pipellm-pi-provider
 ```
 
 Install the independent CLI, or run it without a global installation:
 
 ```sh
-npm install -g pipellm-pi-provider@0.3.1
+npm install -g pipellm-pi-provider
 pipellm-pi-provider --help
-npx --yes --package=pipellm-pi-provider@0.3.1 pipellm-pi-provider --help
+npx --yes pipellm-pi-provider --help
 ```
 
 The CLI requires Node.js 22+. `npm install` installs the CLI; `pi install` registers the extension.
 Host Pi packages are optional peers and are not bundled.
 
+These commands use npm's `latest` release. To pin an audited version for a team or
+reproducible setup, use `pi install npm:pipellm-pi-provider@0.3.2` instead. The published manifest
+includes the `pi-package` keyword for discovery in the [Pi package gallery](https://pi.dev/packages).
+
 You can also install directly from
 [GitHub Releases](https://github.com/lwyBZss8924d/pipellm-pi-provider/releases):
 
 ```sh
-curl -fL https://github.com/lwyBZss8924d/pipellm-pi-provider/releases/download/v0.3.1/pipellm-pi-provider-0.3.1-install.sh -o pipellm-pi-provider-0.3.1-install.sh && sh pipellm-pi-provider-0.3.1-install.sh
+curl -fL https://github.com/lwyBZss8924d/pipellm-pi-provider/releases/download/v0.3.2/pipellm-pi-provider-0.3.2-install.sh -o pipellm-pi-provider-0.3.2-install.sh && sh pipellm-pi-provider-0.3.2-install.sh
 ```
 
 The installer embeds the `.tgz`, verifies its SHA-256 and delegates registration to `pi install`.
@@ -166,7 +170,8 @@ GitHub-hosted runners. Reauthenticate on the runner when required; keep the logi
 Device login does not establish access to every protected security model.
 
 The gate refuses incomplete/error scans, incomplete coverage/deferred review, and high/critical
-findings. Full reports stay on the runner and do not enter npm or GitHub release assets. See
+findings. Full reports persist privately under `$CODEX_HOME/pipellm-release-scans/` on the runner
+after the job; maintainers manage their retention. They do not enter npm or GitHub release assets. See
 [SECURITY.md](SECURITY.md). To inspect locally:
 
 ```sh

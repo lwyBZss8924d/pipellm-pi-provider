@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing release tag, e.g. v0.3.1
+        description: Existing release tag, e.g. v0.3.2
         required: true
         type: string
 permissions:
@@ -87,7 +87,8 @@ jobs:
         env:
           CODEX_SECURITY_MODEL: ${{ vars.CODEX_SECURITY_MODEL || 'gpt-6-sol' }}
         run: |
-          export CODEX_SECURITY_OUTPUT_DIR="$RUNNER_TEMP/pipellm-security-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          umask 077
+          export CODEX_SECURITY_OUTPUT_DIR="$CODEX_HOME/pipellm-release-scans/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           bun scripts/security-scan.ts .
       # Detailed findings and authentication state remain on the runner.
   publish-npm:
@@ -122,7 +123,7 @@ jobs:
           } else {
             let error; try { error = JSON.parse(query.stdout).error; } catch {}
             if (error?.code !== 'E404') throw new Error('Cannot establish npm version availability');
-            const publish = spawnSync('npm', ['publish', archive, '--access', 'public', '--ignore-scripts'], {stdio:'inherit'});
+            const publish = spawnSync('npm', ['publish', archive, '--access', 'public', '--tag', 'latest', '--ignore-scripts'], {stdio:'inherit'});
             if (publish.status !== 0) process.exit(publish.status || 1);
           }
           JS

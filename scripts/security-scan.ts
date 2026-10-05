@@ -13,8 +13,6 @@ const security = new CodexSecurity({
     model: process.env.CODEX_SECURITY_MODEL || 'gpt-6-sol',
     model_reasoning_effort: 'high',
     features: {
-      plugins: true,
-      goals: true,
       multi_agent_v2: { enabled: true, max_concurrent_threads_per_session: 3 },
     },
   },

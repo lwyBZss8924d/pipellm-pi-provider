@@ -74,6 +74,7 @@ test('release ships compiled entry, corresponding OSS sources and license withou
   );
   const release = JSON.parse(await readFile(join(output, 'package/package.json'), 'utf8'));
   expect(release.pi.extensions).toEqual(['./dist/index.js']);
+  expect(release.keywords).toContain('pi-package');
   expect(release.license).toBe('MIT');
   expect(release.dependencies).toBeUndefined();
   expect(release.devDependencies).toBeUndefined();
