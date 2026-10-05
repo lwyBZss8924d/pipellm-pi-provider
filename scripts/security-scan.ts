@@ -7,7 +7,9 @@ import { releaseGate } from "./security-gate";
 const repository = resolve(process.argv[2] || ".");
 const outputDir = process.env.CODEX_SECURITY_OUTPUT_DIR || await mkdtemp(join(tmpdir(), "pipellm-security-"));
 await mkdir(outputDir, { recursive: true, mode: 0o700 });
-const security = new CodexSecurity();
+const security = new CodexSecurity({ codexOverrides: {
+ model: process.env.CODEX_SECURITY_MODEL || "gpt-6.1-sol", model_reasoning_effort: "high",
+} });
 try {
  const options = { auth: "chatgpt" as const, mode: "standard" as const, outputDir,
   knowledgeBasePaths: [join(repository, "SECURITY.md")], failureSeverity: "high" as const };

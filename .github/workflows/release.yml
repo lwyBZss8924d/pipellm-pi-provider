@@ -85,6 +85,7 @@ jobs:
       - name: Scan with pinned Codex Security SDK
         env:
           CODEX_SECURITY_OUTPUT_DIR: ${{ runner.temp }}/pipellm-security-${{ github.run_id }}-${{ github.run_attempt }}
+          CODEX_SECURITY_MODEL: ${{ vars.CODEX_SECURITY_MODEL || 'gpt-6.1-sol' }}
         run: bun scripts/security-scan.ts .
       # Detailed findings and authentication state remain on the runner.
   publish:

@@ -147,6 +147,8 @@ The security job requires a maintainer-controlled self-hosted runner labelled
 to a dedicated login directory outside the checkout. Provision its login with
 `codex login --device-auth` and verify `codex login status`. The SDK explicitly
 selects `auth: "chatgpt"`; no OpenAI API key or copied login-file secret is needed.
+The scan model defaults to `gpt-6.1-sol` with high reasoning; select another
+account-supported model with the `CODEX_SECURITY_MODEL` repository variable.
 Only release tags on `main` and maintainer manual releases reach this runner.
 Pull requests run on GitHub-hosted runners. Reauthenticate on the runner when
 required; keep the login directory private. Device login does not establish
