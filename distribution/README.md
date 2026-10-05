@@ -27,7 +27,7 @@ npx --yes pipellm-pi-provider --help
 
 `pi install` registers the extension; `npm install` installs the CLI. Node.js 22+ is required.
 Pi host packages are optional peers and are not bundled. Default commands use npm's `latest`;
-use `pi install npm:pipellm-pi-provider@0.3.4` to pin a reproducible version. The package declares
+use `pi install npm:pipellm-pi-provider@0.3.5` to pin a reproducible version. The package declares
 `pi-package` for discovery in the [Pi gallery](https://pi.dev/packages).
 
 Alternatively, install the compiled package from the latest GitHub Release:
@@ -142,14 +142,16 @@ sh dist/pipellm-pi-provider-install.sh
 
 Build output includes the `.tgz`, stable/versioned installers and `SHA256SUMS`. CI tests Linux/macOS,
 types, formatting and installations. Releases bind the version tag to its commit, verify checksums,
-run the pinned [Codex Security SDK](https://github.com/openai/codex-security), publish that tested
+run the pinned [Codex Security SDK](https://learn.chatgpt.com/docs/security/sdk)
+([source](https://github.com/openai/codex-security)), publish that tested
 archive to npm `latest`, and upload GitHub assets. npm uses the repository's `NPM_TOKEN` secret.
 
 Security scans use a dedicated maintainer-controlled self-hosted runner labelled
 `codex-security-chatgpt`, with Node 24, Bun, Python 3.10+ and private `CODEX_HOME` outside the checkout.
 Provision ChatGPT login with `codex login --device-auth`; verify `codex login status`. The SDK uses
-`auth: "chatgpt"`. Select an account-supported model with the `CODEX_SECURITY_MODEL` repository
-variable; the fallback is `gpt-6-sol` with high reasoning. Device login does not guarantee model
+`auth: "chatgpt"`. The SDK and native Codex CLI are pinned separately; the scanner uses the project's
+CLI rather than the SDK's older bundled runtime. Select an account-supported model with the
+`CODEX_SECURITY_MODEL` repository variable; the fallback is `gpt-6.1-sol` with high reasoning. Device login does not guarantee model
 access. Pull requests run only on hosted runners without this login state.
 
 Publication rejects scan errors, incomplete coverage/deferred review and high/critical findings.

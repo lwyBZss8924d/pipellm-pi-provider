@@ -85,7 +85,7 @@ jobs:
           bunx --no-install codex-security login status
       - name: Scan with pinned Codex Security SDK
         env:
-          CODEX_SECURITY_MODEL: ${{ vars.CODEX_SECURITY_MODEL || 'gpt-6-sol' }}
+          CODEX_SECURITY_MODEL: ${{ vars.CODEX_SECURITY_MODEL || 'gpt-6.1-sol' }}
         run: |
           umask 077
           export CODEX_SECURITY_OUTPUT_DIR="$CODEX_HOME/pipellm-release-scans/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
