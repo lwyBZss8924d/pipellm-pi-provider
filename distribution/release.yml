@@ -89,11 +89,9 @@ jobs:
           CODEX_SECURITY_MODEL: ${{ vars.CODEX_SECURITY_MODEL || 'gpt-6-sol' }}
         run: bun scripts/security-scan.ts .
       # Detailed findings and authentication state remain on the runner.
-  publish:
+  publish-npm:
     needs: [verify, security]
     runs-on: ubuntu-24.04
-    permissions:
-      contents: write
     steps:
       - uses: actions/setup-node@v4
         with:
@@ -127,6 +125,18 @@ jobs:
             if (publish.status !== 0) process.exit(publish.status || 1);
           }
           JS
+  publish-github:
+    needs: [verify, security]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ needs.verify.outputs.revision }}
+          path: dist
+      - run: shasum -a 256 --check SHA256SUMS
+        working-directory: dist
       - name: Publish GitHub release assets
         env:
           GH_TOKEN: ${{ github.token }}
