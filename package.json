@@ -1,8 +1,8 @@
 {
   "name": "pipellm-pi-provider",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "private": true,
-  "description": "PipeLLM provider for Pi with gateway configuration, Keychain login, and CLI management.",
+  "description": "PipeLLM provider for Pi with Anthropic Messages, macOS Keychain login, and a management CLI.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -21,7 +21,9 @@
   "keywords": [
     "pi-package",
     "pi-extension",
-    "pipellm"
+    "pipellm",
+    "anthropic",
+    "keychain"
   ],
   "pi": {
     "extensions": [

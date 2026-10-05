@@ -54,6 +54,8 @@ test('release ships compiled entry, corresponding OSS sources and license withou
   expect(paths).toContain('package/dist/index.js');
   for (const path of [
     'LICENSE',
+    'assets/README.md',
+    'assets/pipellm-code-dark.svg',
     'source/src/index.ts',
     'source/src/compat-tools.ts',
     'source/bun.lock',
@@ -68,7 +70,7 @@ test('release ships compiled entry, corresponding OSS sources and license withou
   }
   expect(
     paths.every((p) =>
-      /^package\/(?:package\.json|LICENSE|SECURITY\.md|README\.md|SKILL\.md|dist\/[^/]+\.js|source\/.+|THIRD_PARTY_LICENSES\/.+)$/.test(
+      /^package\/(?:package\.json|LICENSE|SECURITY\.md|README\.md|SKILL\.md|assets\/(?:README\.md|pipellm-code-dark\.svg)|dist\/[^/]+\.js|source\/.+|THIRD_PARTY_LICENSES\/.+)$/.test(
         p,
       ),
     ),

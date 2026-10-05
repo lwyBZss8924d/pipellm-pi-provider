@@ -71,6 +71,7 @@ const releaseManifest = {
   exports: { '.': './dist/index.js' },
   files: [
     'dist',
+    'assets',
     'source',
     'README.md',
     'LICENSE',
@@ -86,19 +87,21 @@ const releaseManifest = {
     '@earendil-works/pi-ai': { optional: true },
     '@earendil-works/pi-coding-agent': { optional: true },
   },
-  repository: { type: 'git', url: 'git+https://github.com/lwyBZss8924d/pipellm-pi-provider.git' },
-  homepage: 'https://github.com/lwyBZss8924d/pipellm-pi-provider#readme',
-  bugs: { url: 'https://github.com/lwyBZss8924d/pipellm-pi-provider/issues' },
+  repository: manifest.repository,
+  homepage: manifest.homepage,
+  bugs: manifest.bugs,
 };
 await writeFile(join(stage, 'package.json'), JSON.stringify(releaseManifest, null, 2) + '\n');
 await cp(join(root, 'distribution/README.md'), join(stage, 'README.md'));
 await cp(join(root, 'distribution/SKILL.md'), join(stage, 'SKILL.md'));
 await cp(join(root, 'LICENSE'), join(stage, 'LICENSE'));
 await cp(join(root, 'SECURITY.md'), join(stage, 'SECURITY.md'));
+await cp(join(root, 'assets'), join(stage, 'assets'), { recursive: true });
 
 // An explicit allowlist keeps private state and development dependencies out.
 const sources = [
   'src',
+  'assets',
   '.prettierrc.json',
   'bunfig.toml',
   'package.json',
