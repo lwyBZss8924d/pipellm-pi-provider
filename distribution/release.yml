@@ -146,7 +146,22 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ needs.verify.outputs.tag }}
         run: |
+          cat > release-notes.md <<'NOTES'
+          Install in Pi:
+
+          ```sh
+          pi install npm:pipellm-pi-provider
+          ```
+
+          PipeLLM provider with gateway setup, verified macOS Keychain login, a management CLI, and a nonblocking tool observer.
+
+          [CLI and setup docs](https://github.com/lwyBZss8924d/pipellm-pi-provider#configure) · [Standalone installer](https://github.com/lwyBZss8924d/pipellm-pi-provider/releases/latest/download/pipellm-pi-provider-install.sh)
+
+          Tests and the pinned Codex Security SDK release gate passed for this tag.
+          NOTES
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release create "$RELEASE_TAG" --verify-tag --title "PipeLLM Pi provider $RELEASE_TAG" --notes 'Compiled Pi extension and standalone Incur CLI, MIT source, macOS Keychain authentication, and checksum-verified standalone installer. Tests and Codex Security SDK release gate passed.'
+            gh release create "$RELEASE_TAG" --verify-tag --title "PipeLLM Pi provider $RELEASE_TAG" --notes-file release-notes.md
+          else
+            gh release edit "$RELEASE_TAG" --notes-file release-notes.md
           fi
           gh release upload "$RELEASE_TAG" dist/*.tgz dist/*-install.sh dist/SHA256SUMS --clobber
