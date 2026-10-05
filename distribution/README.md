@@ -203,9 +203,39 @@ PIPELLM_COMPAT_MODELS=claude-opus-5-5 pi
 
 Remove credentials separately in macOS Keychain Access.
 
-## Release security
+## Develop
 
-The release workflow uses the pinned [OpenAI Codex Security SDK](https://learn.chatgpt.com/docs/security/sdk)
+| Directory       | Contents                                            |
+| --------------- | --------------------------------------------------- |
+| `src/`          | Extension, CLI, and shared code                     |
+| `assets/`       | Theme variant and brand provenance                  |
+| `scripts/`      | Build and release tools                             |
+| `tests/`        | Contracts and fixtures                              |
+| `distribution/` | Canonical README, CLI guide, and workflow templates |
+
+Root documents and workflows match their `distribution/` templates.
+The development manifest has `private: true` and points `pi.extensions` to TypeScript.
+Packing creates a publishable manifest with compiled JavaScript, `bin`, `exports`, and optional peers.
+
+From the repository or the archive's `source/` directory:
+
+```sh
+bun install --frozen-lockfile --ignore-scripts
+bun test tests
+bun run typecheck
+bun run format:check
+bun run pack
+```
+
+Build output includes the `.tgz`, stable and versioned installers, and `SHA256SUMS`.
+Use isolated Pi settings and an isolated destination when testing the installer.
+Release workflows publish the tested archive to npm `latest` and GitHub Releases.
+npm publication uses the repository's `NPM_TOKEN` secret.
+
+### Release security
+
+The release workflow uses the pinned
+<a href="https://learn.chatgpt.com/docs/security/sdk"><img src="https://raw.githubusercontent.com/openai/codex-security/main/plugins/codex-security/assets/logo.png" alt="" width="32" height="32" align="middle"> OpenAI Codex Security SDK</a>
 from its [official OSS repository](https://github.com/openai/codex-security).
 Publication requires these checks:
 
@@ -249,35 +279,6 @@ Run `bun scripts/security-scan.ts . --preflight` to check local inputs only.
 Omit `--preflight` to run a scan.
 
 </details>
-
-## Develop
-
-| Directory       | Contents                                            |
-| --------------- | --------------------------------------------------- |
-| `src/`          | Extension, CLI, and shared code                     |
-| `assets/`       | Theme variant and brand provenance                  |
-| `scripts/`      | Build and release tools                             |
-| `tests/`        | Contracts and fixtures                              |
-| `distribution/` | Canonical README, CLI guide, and workflow templates |
-
-Root documents and workflows match their `distribution/` templates.
-The development manifest has `private: true` and points `pi.extensions` to TypeScript.
-Packing creates a publishable manifest with compiled JavaScript, `bin`, `exports`, and optional peers.
-
-From the repository or the archive's `source/` directory:
-
-```sh
-bun install --frozen-lockfile --ignore-scripts
-bun test tests
-bun run typecheck
-bun run format:check
-bun run pack
-```
-
-Build output includes the `.tgz`, stable and versioned installers, and `SHA256SUMS`.
-Use isolated Pi settings and an isolated destination when testing the installer.
-Release workflows publish the tested archive to npm `latest` and GitHub Releases.
-npm publication uses the repository's `NPM_TOKEN` secret.
 
 ## Roadmap
 
