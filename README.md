@@ -2,15 +2,13 @@
   <a href="https://code.pipellm.ai/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/lwyBZss8924d/pipellm-pi-provider/main/assets/pipellm-code-dark.svg">
-      <img src="https://code.pipellm.ai/assets/logo-GN9Pw8pU.svg" alt="PipeLLM Code" width="203" height="24">
+      <img src="https://code.pipellm.ai/assets/logo-GN9Pw8pU.svg" alt="PipeLLM Code" width="192" align="middle">
     </picture>
   </a>
+  <a href="https://pi.dev/"><img src="https://pi.dev/logo-auto.svg" alt="Pi" width="48" height="48" align="middle"></a>
 </p>
 
-<h1 align="center">
-  pipellm-pi-provider for
-  <a href="https://pi.dev/"><img src="https://pi.dev/logo-auto.svg" alt="" width="48" height="48" align="middle"> Pi</a>
-</h1>
+<h1 align="center">pipellm-pi-provider for Pi</h1>
 
 <p align="center">
   Connect Pi to PipeLLM with Anthropic Messages streaming, macOS Keychain login, and gateway management from the TUI or CLI.
@@ -18,7 +16,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/pipellm-pi-provider"><img src="https://img.shields.io/npm/v/pipellm-pi-provider?style=flat-square" alt="npm version"></a>
-  <a href="https://learn.chatgpt.com/docs/security/sdk"><img src="https://raw.githubusercontent.com/openai/codex-security/main/plugins/codex-security/assets/logo.png" alt="" width="20" height="20" align="middle"> <img src="https://img.shields.io/badge/Codex%20Security%20SDK-0.1.31-1f6feb?style=flat-square" alt="OpenAI Codex Security SDK 0.1.31"></a>
+  <a href="https://learn.chatgpt.com/docs/security/sdk"><img src="https://img.shields.io/badge/Codex%20Security%20SDK-0.1.31-1f6feb?style=flat-square" alt="OpenAI Codex Security SDK 0.1.31"></a>
 </p>
 
 <p align="center">
