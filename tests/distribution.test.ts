@@ -7,7 +7,7 @@ import manifest from '../package.json';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const output = join(root, 'dist');
-const installer = join(output, `${manifest.name}-${manifest.version}-install.sh`);
+const installer = join(output, `${manifest.name}-install.sh`);
 const archive = join(output, `${manifest.name}-${manifest.version}.tgz`);
 const installedPath = (process.env.PATH || '')
   .split(delimiter)
@@ -57,6 +57,10 @@ test('release ships compiled entry, corresponding OSS sources and license withou
     'source/src/index.ts',
     'source/src/compat-tools.ts',
     'source/bun.lock',
+    'source/AGENTS.md',
+    'source/SKILL.md',
+    'source/SPEC.md',
+    'source/llms.txt',
     'source/scripts/build.ts',
     'source/tests/fixtures/compat-golden.json',
   ]) {
@@ -80,6 +84,9 @@ test('release ships compiled entry, corresponding OSS sources and license withou
   expect(release.devDependencies).toBeUndefined();
   expect(release.scripts).toBeUndefined();
   expect(release.peerDependencies['@earendil-works/pi-coding-agent']).toBe('*');
+  expect(await readFile(installer)).toEqual(
+    await readFile(join(output, `${manifest.name}-${manifest.version}-install.sh`)),
+  );
 });
 
 test('extracted compiled observer runs under Node with no source files or node_modules', async () => {

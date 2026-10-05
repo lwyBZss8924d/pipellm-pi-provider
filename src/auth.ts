@@ -14,7 +14,7 @@ export function registerGateway(
   let sessionKey: string | undefined;
   const provider: Provider = {
     id: 'pipellm',
-    name: 'PipeLLM (Keychain)',
+    name: 'PipeLLM',
     getModels: () => [],
     // models.json owns models and Pi composes their native API streams above this auth provider.
     stream: () => {
@@ -96,7 +96,7 @@ export function registerGateway(
         );
         if (output === undefined) return;
         const thinking = await ctx.ui.select('Thinking policy', [
-          'Adaptive only',
+          'Adaptive when reasoning is enabled',
           'Native/default',
         ]);
         if (thinking === undefined) return;
@@ -115,7 +115,7 @@ export function registerGateway(
           cost: template?.cost || { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
           contextWindow: Number(context),
           maxTokens: Number(output),
-          compat: { forceAdaptiveThinking: thinking === 'Adaptive only' },
+          compat: { forceAdaptiveThinking: thinking === 'Adaptive when reasoning is enabled' },
         });
         await ctx.modelRegistry.refresh({ allowNetwork: false });
         ctx.ui.notify(
@@ -136,6 +136,13 @@ export function registerGateway(
     description: 'Validate an API key in hidden input, then save to macOS Keychain',
     handler: async (args, ctx) => {
       if (!interactive(args, ctx)) return;
+      if (ctx.mode !== 'tui') {
+        ctx.ui.notify(
+          'Hidden key input requires the terminal TUI; use the standalone CLI for RPC login.',
+          'error',
+        );
+        return;
+      }
       if (!keychain.supported) {
         ctx.ui.notify(
           'Keychain storage requires macOS. On other systems supply PIPELLM_API_KEY in the environment.',

@@ -1,9 +1,12 @@
 {
   "name": "pipellm-pi-provider",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
-  "description": "MIT PipeLLM Pi extension with gateway setup, macOS Keychain authentication, and a nonblocking tool observer.",
+  "description": "PipeLLM provider for Pi with gateway configuration, Keychain login, and CLI management.",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "bun scripts/build.ts",
     "pack": "bun scripts/build.ts --pack",
@@ -12,8 +15,8 @@
     "typecheck": "tsc --noEmit",
     "test:live": "PIPELLM_LIVE=1 bun test tests/live.test.ts",
     "test:e2e": "PIPELLM_LIVE=1 PIPELLM_E2E=1 bun test tests/e2e.test.ts",
-    "format": "prettier --write src scripts tests package.json tsconfig.json distribution/*.md SECURITY.md",
-    "format:check": "prettier --check src scripts tests package.json tsconfig.json distribution/*.md SECURITY.md"
+    "format": "prettier --write src scripts tests package.json tsconfig.json distribution/*.md AGENTS.md README.md SECURITY.md SKILL.md SPEC.md",
+    "format:check": "prettier --check src scripts tests package.json tsconfig.json distribution/*.md AGENTS.md README.md SECURITY.md SKILL.md SPEC.md"
   },
   "keywords": [
     "pi-package",

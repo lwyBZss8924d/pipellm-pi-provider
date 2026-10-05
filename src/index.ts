@@ -4,7 +4,7 @@ import { adaptiveThinking, compatModels, GATEWAY_TOOLS, relocateSystem } from '.
 import { createToolGuard } from './contract';
 import { registerGateway } from './auth';
 
-/** Pi-only observer. Model declarations and thinking policy belong in models.json. */
+/** PipeLLM authentication and commands, with a nonblocking observer; models stay in models.json. */
 export default async function (pi: ExtensionAPI) {
   registerGateway(pi);
   const models = compatModels(process.env.PIPELLM_COMPAT_MODELS);

@@ -1,0 +1,16 @@
+# pipellm-pi-provider
+
+> PipeLLM provider for Pi: gateway setup, macOS Keychain login and an Incur management CLI.
+
+- [README](README.md): installation, slash commands, CLI, compatibility and releases.
+- [Agent instructions](AGENTS.md): source changes and required checks.
+- [Contract](SPEC.md): runtime, credential, distribution and acceptance rules.
+- [Security policy](SECURITY.md): review boundaries and private vulnerability reports.
+- [CLI guide](SKILL.md): safe command discovery, previews and credential operations.
+- [Extension](src/index.ts): native provider registration and optional tool observer.
+- [CLI](src/cli.ts): configuration, authentication and diagnostics.
+- [Build](scripts/build.ts): compiled payload, source, licenses and installers.
+- [Tests](tests/): offline contracts, golden fixtures and opt-in live checks.
+- [Pi custom providers](https://pi.dev/docs/latest/custom-provider)
+- [Pi extensions](https://pi.dev/docs/latest/extensions)
+- [Pi packages](https://pi.dev/docs/latest/packages)

@@ -107,6 +107,10 @@ const sources = [
   'scripts',
   'distribution',
   'tests',
+  'AGENTS.md',
+  'SKILL.md',
+  'SPEC.md',
+  'llms.txt',
   'LICENSE',
   'SECURITY.md',
 ];
@@ -136,13 +140,16 @@ if (process.argv.includes('--pack')) {
     template.replaceAll('@VERSION@', manifest.version).replaceAll('@SHA256@', digest) +
     bytes.toString('base64').replace(/.{1,76}/g, '$&\n');
   const installerName = `${manifest.name}-${manifest.version}-install.sh`;
+  const latestInstallerName = `${manifest.name}-install.sh`;
   await writeFile(join(output, installerName), installer, { mode: 0o755 });
+  await writeFile(join(output, latestInstallerName), installer, { mode: 0o755 });
   const installerDigest = createHash('sha256').update(installer).digest('hex');
   await writeFile(
     join(output, 'SHA256SUMS'),
-    `${digest}  ${filename}\n${installerDigest}  ${installerName}\n`,
+    `${digest}  ${filename}\n${installerDigest}  ${installerName}\n${installerDigest}  ${latestInstallerName}\n`,
   );
   console.log(`Distributable archive: ${archive}`);
   console.log(`One-command installer: ${join(output, installerName)}`);
+  console.log(`Latest-release installer: ${join(output, latestInstallerName)}`);
   console.log(`SHA256 checksums: ${join(output, 'SHA256SUMS')}`);
 }

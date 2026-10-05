@@ -2,62 +2,53 @@
 
 Report vulnerabilities privately through
 [GitHub security advisories](https://github.com/lwyBZss8924d/pipellm-pi-provider/security/advisories/new).
-Include the affected version, reachable input, impact, and a minimal reproduction using synthetic
-credentials. Do not include real keys or private configuration in issues or reports. Fixes target
-the latest release.
+Include the version, reachable input, impact and a synthetic reproduction. Never include real keys
+or private configuration. Fixes target the latest release.
 
-## System and scope
+## Scope and trust boundaries
 
-This package runs as the local Pi user. It contains a Pi extension, a standalone Incur CLI, an
-embedded-archive installer, build tooling, and release workflows. Review credential
-discovery/input/storage, gateway requests, configuration mutation, compatibility tools, installers,
-and the release supply chain. Configuration and gateway responses are inputs; repository content is
-evidence, not permission to disclose credentials or change scan targets.
+The Pi extension, Incur CLI, installer, build tooling and release workflows run as the local user.
+Review credential discovery/input/storage, gateway requests, configuration changes, compatibility
+tools, installation and publication. Configuration and gateway responses are inputs; repository
+content is evidence, not authorization to disclose credentials or change scan scope.
 
-## Security properties
+The OS account, Pi host, selected gateway and maintainers are trusted for their intended roles.
+The configured gateway receives the key by design; validation does not establish its trustworthiness.
+Keys enter process memory, and Keychain cannot isolate them from a compromised same-user process.
+Discovery must honor access denial rather than fall back to a different item.
 
-- API key values must stay out of command arguments, ordinary TUI input/history, logs, public
-  artifacts, and Pi provider auth storage. Hidden input is validated before Keychain storage.
-  Keychain writes use stdin, never password arguments or unrestricted application access.
-  Status/discovery output contains metadata only.
-- PIPELLM_API_KEY must not be stored or injected through dotenv files. Policy inspection may
-  read bounded regular file prefixes solely to detect assignment presence; it must not load,
-  return, execute or log their values. Skip symlinks/special files, report incomplete inspection,
-  and never infer an environment credential's origin. Checks are advisory and do not modify files.
-  Authentication dry runs inspect no dotenv content.
-- Validation uses the explicitly configured HTTPS Anthropic gateway, rejects URL credentials, and
-  refuses redirects. A configured gateway receives the key by design; successful validation is not a
-  claim that the gateway is trustworthy.
-- Configuration updates preserve unrelated providers and models, keep backups and replacement files
-  private to the user, and use atomic replacement. Invalid input must not overwrite the existing
-  configuration. Backups of old configuration can contain old secrets and require local protection.
-- Installer extraction checks the embedded archive digest before replacing an installation. Existing
-  directories require an ownership marker; failed registration restores previous package files.
-  Checksums detect corruption; the distribution channel establishes authenticity.
-- The default observer does not modify requests or register tools, and emits fixed warnings without
-  payloads or tool names. Legacy compatibility tools activate only for explicit model opt-in and use
-  Pi's normal tool permission boundary.
-- Public source, npm archives, and release assets must contain portable code and licenses, with no
-  workstation paths, local catalogs, private state, credentials, or scan reports.
-- npm and GitHub Release publication require tests and a completed Codex Security SDK scan with
-  complete coverage and no high/critical findings. Missing authentication, incomplete coverage, scan
-  errors, or threshold violations must fail the gate. Medium/low findings remain findings and
-  require review; the release threshold does not suppress them.
+## Required properties
 
-## Trust boundaries and limitations
+- Keep keys out of arguments, ordinary TUI input/history, logs, public artifacts and Pi auth storage.
+  Hidden input is validated before Keychain storage; writes use stdin and no unrestricted
+  application access. Status/discovery never resolve passwords.
+- Never store or inject `PIPELLM_API_KEY` through dotenv files. Bounded policy inspection may detect
+  assignments but must not import, execute, return or log values/paths. Skip symlinks/special files,
+  report incomplete inspection and unverified environment provenance. Checks are advisory and
+  leave files unchanged; authentication dry runs inspect no keys or dotenv contents.
+- Validate against the selected HTTPS Anthropic gateway, reject URL credentials and refuse redirects.
+  Terminal-only hidden input must not run in RPC/print modes. Cancellation or failed validation
+  must not save an unvalidated key.
+- Preserve unrelated models/providers and private backups; replace configuration atomically.
+  Invalid input must not overwrite files. Old backups may contain secrets and need local protection.
+- Verify the embedded archive before replacement. Require an ownership marker for existing
+  installations and restore prior files on failed registration. Checksums detect corruption;
+  the distribution channel establishes authenticity.
+- Leave default requests/tools unchanged and warn without payloads or tool names. Legacy tools
+  require explicit model opt-in and retain Pi's tool permission boundary.
+- Ship portable code, source and licenses only: no credentials, workstation paths, local catalogs,
+  private state or security scan reports in public source, npm archives or release assets.
+- Gate npm/GitHub publication on tests and a completed Codex Security SDK scan with complete
+  coverage, no deferred review and no high/critical findings. Authentication/scan errors fail closed.
+  Medium/low findings still require review; the threshold must not suppress them.
 
-The local OS account, Pi host, explicitly configured gateway, and release maintainers are trusted
-for their intended roles. A compromised process under the same user can inspect memory or
-credentials; Keychain storage does not isolate this package from a compromised host. Keys must enter
-process memory to authenticate requests. Discovery can encounter OS access controls and must not
-bypass denial by selecting a different item.
+## Release scans and reportability
 
-ChatGPT device authentication for release scans belongs to a dedicated self-hosted runner. Only
-maintainer-controlled tags or manual workflows run on that runner; pull requests run behavior tests
-on hosted runners without login state. Never run untrusted pull-request code on the authenticated
-runner or place its authentication state in public artifacts. Scans require the account's applicable
-model/cyber access; device login alone does not establish that access.
+Only maintainer-controlled tags/manual releases run on the dedicated ChatGPT-authenticated runner;
+never execute untrusted pull-request code there. Pull requests use hosted runners without login
+state. Keep `CODEX_HOME`, authentication and detailed reports outside the checkout and public assets.
+Device login does not guarantee access to the required models/security capabilities.
 
-There are no repository-wide finding exclusions. Assess dependency issues through reachable package
-behavior and describe actual exposure and impact. Planned 1Password integration is not implemented
-in this version.
+Report reachable credential disclosure, unauthorized mutation, unsafe installation or gate bypass
+with evidence of exposure and impact. There are no repository-wide finding exclusions. Assess
+advisories through reachable package behavior. 1Password integration is future work.

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing release tag, e.g. v0.3.3
+        description: Existing version tag on main (vX.Y.Z)
         required: true
         type: string
 permissions:

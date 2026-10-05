@@ -65,6 +65,7 @@ function fake(keychain = memoryKeychain()) {
     async () => {},
   );
   const ctx: any = {
+    mode: 'tui',
     hasUI: true,
     model,
     modelRegistry: { getAll: () => [model], refresh: async () => {} },
@@ -216,6 +217,18 @@ test('TUI saves only after successful validation, ignores key arguments, and can
   await f.commands.get('pipellm-login').handler(key, f.ctx);
   expect(backend.calls).toEqual([]);
   expect(f.notices.join('\n')).not.toContain(key);
+  await f.commands.get('pipellm-login').handler('', {
+    ...f.ctx,
+    mode: 'rpc',
+    ui: {
+      ...f.ctx.ui,
+      custom: async () => {
+        throw new Error('RPC must not open terminal input');
+      },
+    },
+  });
+  expect(backend.calls).toEqual([]);
+  expect(f.notices.join('\n')).toContain('terminal TUI');
   await f.commands
     .get('pipellm-login')
     .handler('', { ...f.ctx, ui: { ...f.ctx.ui, custom: async () => undefined } });
