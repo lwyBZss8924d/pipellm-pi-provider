@@ -26,6 +26,7 @@ jobs:
       - run: npm install --global @earendil-works/pi-coding-agent@1.0.2 --ignore-scripts
       - run: bun test tests
       - run: bun run typecheck
+      - run: bun run format:check
       - run: git diff --check
       - run: bun run pack
       - run: shasum -a 256 --check SHA256SUMS

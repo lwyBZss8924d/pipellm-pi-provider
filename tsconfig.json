@@ -1,5 +1,15 @@
 {
- "compilerOptions": { "target":"ES2022", "module":"Preserve", "moduleResolution":"Bundler", "strict":true,
-  "noEmit":true, "skipLibCheck":true, "types":["bun"], "resolveJsonModule":true, "esModuleInterop":true },
- "include":["*.ts", "scripts/**/*.ts", "tests/**/*.ts"], "exclude":[".local", "dist", "node_modules"]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["bun"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "index.ts"],
+  "exclude": [".local", "dist", "node_modules"]
 }

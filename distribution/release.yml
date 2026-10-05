@@ -49,6 +49,7 @@ jobs:
       - run: npm install --global @earendil-works/pi-coding-agent@1.0.2 --ignore-scripts
       - run: bun test tests
       - run: bun run typecheck
+      - run: bun run format:check
       - run: git diff --check
       - run: bun run pack
       - run: shasum -a 256 --check SHA256SUMS
@@ -85,7 +86,7 @@ jobs:
       - name: Scan with pinned Codex Security SDK
         env:
           CODEX_SECURITY_OUTPUT_DIR: ${{ runner.temp }}/pipellm-security-${{ github.run_id }}-${{ github.run_attempt }}
-          CODEX_SECURITY_MODEL: ${{ vars.CODEX_SECURITY_MODEL || 'gpt-6.1-sol' }}
+          CODEX_SECURITY_MODEL: ${{ vars.CODEX_SECURITY_MODEL || 'gpt-6-sol' }}
         run: bun scripts/security-scan.ts .
       # Detailed findings and authentication state remain on the runner.
   publish:
