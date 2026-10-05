@@ -1,0 +1,116 @@
+#!/bin/sh
+# MIT License. Corresponding sources and LICENSE are embedded in the archive.
+set -eu
+version='@VERSION@'
+expected_sha256='@SHA256@'
+client=pi
+package_command=false
+extract_only=false
+prefix=''
+usage() {
+ cat <<'USAGE'
+Usage: sh pipellm-pi-provider-VERSION-install.sh [options]
+  --client COMMAND       Pi-compatible CLI executable (default: pi)
+  --package-command      Use "COMMAND package install" instead of "COMMAND install"
+  --prefix DIRECTORY     Permanent package directory
+  --extract-only DIR     Extract without registering with a client
+  --help                 Show this help
+Requires POSIX sh, tar, base64, and sha256sum or shasum. No build tools or network.
+USAGE
+}
+die() { printf '%s\n' "$*" >&2; exit 1; }
+while [ "$#" -gt 0 ]; do
+ case "$1" in
+  --client|--prefix|--extract-only)
+   [ "$#" -ge 2 ] && [ -n "$2" ] || die "Missing value for $1"
+   case "$1" in
+    --client) client=$2 ;;
+    --prefix) prefix=$2 ;;
+    --extract-only) prefix=$2; extract_only=true ;;
+   esac
+   shift 2 ;;
+  --package-command) package_command=true; shift ;;
+  --help|-h) usage; exit 0 ;;
+  *) die "Unknown option: $1" ;;
+ esac
+done
+
+if [ "$extract_only" = false ]; then
+ command -v "$client" >/dev/null 2>&1 || die "Client executable unavailable: $client"
+ client_help=$("$client" --help) || die "Cannot inspect client: $client"
+ case "$client_help" in
+  *--extension*) ;;
+  *) die "$client does not advertise Pi extension loading (--extension). Current Prime Agent supports capability packages but cannot run this JavaScript extension. No files or settings were changed." ;;
+ esac
+ if [ "$package_command" = true ]; then
+  "$client" package install --help >/dev/null || die "Client lacks package install"
+ else
+  "$client" install --help >/dev/null || die "Client lacks install; try --package-command for compatible forks"
+ fi
+fi
+for utility in tar base64 sed mktemp; do command -v "$utility" >/dev/null 2>&1 || die "Missing utility: $utility"; done
+if command -v sha256sum >/dev/null 2>&1; then
+ checksum() { sha256sum "$1"; }
+elif command -v shasum >/dev/null 2>&1; then
+ checksum() { shasum -a 256 "$1"; }
+else
+ die "Install sha256sum or shasum before running this installer"
+fi
+if [ -z "$prefix" ]; then
+ [ -n "${XDG_DATA_HOME:-${HOME:-}}" ] || die "Set --prefix or HOME/XDG_DATA_HOME"
+ prefix=${XDG_DATA_HOME:-$HOME/.local/share}/pi-packages/pipellm-pi-provider
+fi
+# Use an absolute, stable package path so reinstalling does not duplicate entries.
+case "$prefix" in /*) ;; *) prefix=$PWD/$prefix ;; esac
+case "$prefix" in /|*/../*|*/..|*/./*|*/.) die "Use a normalized package directory" ;; esac
+prefix=${prefix%/}
+parent=$(dirname "$prefix")
+mkdir -p "$parent"
+parent=$(cd "$parent" && pwd -P)
+prefix=$parent/$(basename "$prefix")
+stage=$(mktemp -d "$parent/.pipellm-install.XXXXXXXX")
+backup=''
+files_moved=false
+completed=false
+cleanup() {
+ if [ "$completed" = false ]; then
+  if [ "$files_moved" = true ]; then rm -rf "$prefix"; fi
+  if [ -n "$backup" ] && [ -e "$backup" ]; then mv "$backup" "$prefix"; fi
+ fi
+ rm -rf "$stage"
+}
+trap cleanup EXIT
+trap 'exit 1' HUP INT TERM
+sed '1,/^__PIPELLM_ARCHIVE_BELOW__$/d' "$0" | base64 -d >"$stage/release.tgz"
+actual_sha256=$(checksum "$stage/release.tgz")
+actual_sha256=${actual_sha256%% *}
+[ "$actual_sha256" = "$expected_sha256" ] || die "Archive checksum mismatch"
+tar -xzf "$stage/release.tgz" -C "$stage"
+[ -f "$stage/package/dist/index.js" ] && [ -f "$stage/package/LICENSE" ] || die "Incomplete Pi package"
+if [ -e "$prefix" ] || [ -L "$prefix" ]; then
+ [ ! -L "$prefix" ] && [ -f "$prefix/package.json" ] &&
+  [ -f "$prefix/dist/index.js" ] && [ -f "$prefix/.pipellm-installer-owned" ] ||
+  die "Refusing to replace an existing directory not owned by this installer: $prefix"
+ backup=$stage/previous
+ mv "$prefix" "$backup"
+fi
+mv "$stage/package" "$prefix"
+files_moved=true
+printf '%s\n' "$version" >"$prefix/.pipellm-installer-owned"
+if [ "$extract_only" = false ]; then
+ if [ "$package_command" = true ]; then
+  if "$client" package install "$prefix"; then installed=true; else installed=false; fi
+ else
+  if "$client" install "$prefix"; then installed=true; else installed=false; fi
+ fi
+ if [ "$installed" = false ]; then
+  die "Client registration failed; package files restored. Inspect the client's settings before retrying."
+ fi
+fi
+completed=true
+printf 'Installed pipellm-pi-provider %s at %s\n' "$version" "$prefix"
+if [ "$extract_only" = false ]; then
+ printf 'Reload or restart %s. PipeLLM models and credentials are configured separately.\n' "$client"
+fi
+exit 0
+__PIPELLM_ARCHIVE_BELOW__

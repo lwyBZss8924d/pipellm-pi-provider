@@ -1,0 +1,29 @@
+{
+  "name": "pipellm-pi-provider",
+  "version": "0.3.0",
+  "private": true,
+  "description": "MIT PipeLLM Pi extension with gateway setup, macOS Keychain authentication, and a nonblocking tool observer.",
+  "type": "module",
+  "scripts": {
+    "build": "bun scripts/build.ts",
+    "pack": "bun scripts/build.ts --pack",
+    "cli": "bun cli.ts",
+    "test": "bun test tests",
+    "typecheck": "tsc --noEmit",
+    "test:live": "PIPELLM_LIVE=1 bun test tests/live.test.ts",
+    "test:e2e": "PIPELLM_LIVE=1 PIPELLM_E2E=1 bun test tests/e2e.test.ts"
+  },
+  "keywords": ["pi-package", "pi-extension", "pipellm"],
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@earendil-works/pi-ai": "1.0.2",
+    "@earendil-works/pi-coding-agent": "1.0.2",
+    "@openai/codex-security": "0.1.31",
+    "@types/bun": "1.3.14",
+    "incur": "0.7.0",
+    "typescript": "5.9.3"
+  }
+}

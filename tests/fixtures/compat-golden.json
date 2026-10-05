@@ -1,0 +1,382 @@
+[
+  {
+    "input": {
+      "system": [
+        {
+          "type": "text",
+          "text": "fixture system"
+        }
+      ],
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": "hello"
+        }
+      ]
+    },
+    "output": {
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "<system-reminder>\n# Actual environment (overrides any other environment description)\n - Platform: synthetic-platform; shell: /synthetic/shell; home: /synthetic/home\n - Working directory: /synthetic/project\n - Use POSIX paths with forward slashes (for example ~/.agents/AGENTS.md). There is no C:\\ drive and no PowerShell.\n - Tools that execute here: Bash, Read, Edit, Write, Skill, ToolSearch.\n\nfixture system\n</system-reminder>"
+            },
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "system": [
+        {
+          "type": "text",
+          "text": "fixture system"
+        }
+      ],
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": "hello"
+        }
+      ],
+      "thinking": {
+        "type": "adaptive"
+      }
+    },
+    "output": {
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "<system-reminder>\n# Actual environment (overrides any other environment description)\n - Platform: synthetic-platform; shell: /synthetic/shell; home: /synthetic/home\n - Working directory: /synthetic/project\n - Use POSIX paths with forward slashes (for example ~/.agents/AGENTS.md). There is no C:\\ drive and no PowerShell.\n - Tools that execute here: Bash, Read, Edit, Write, Skill, ToolSearch.\n\nfixture system\n</system-reminder>"
+            },
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ],
+      "thinking": {
+        "type": "adaptive"
+      }
+    }
+  },
+  {
+    "input": {
+      "system": [
+        {
+          "type": "text",
+          "text": "fixture system"
+        }
+      ],
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": "hello"
+        }
+      ],
+      "thinking": {
+        "type": "disabled"
+      }
+    },
+    "output": {
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "<system-reminder>\n# Actual environment (overrides any other environment description)\n - Platform: synthetic-platform; shell: /synthetic/shell; home: /synthetic/home\n - Working directory: /synthetic/project\n - Use POSIX paths with forward slashes (for example ~/.agents/AGENTS.md). There is no C:\\ drive and no PowerShell.\n - Tools that execute here: Bash, Read, Edit, Write, Skill, ToolSearch.\n\nfixture system\n</system-reminder>"
+            },
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "system": [
+        {
+          "type": "text",
+          "text": "fixture system"
+        }
+      ],
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": "hello"
+        }
+      ],
+      "thinking": {
+        "type": "enabled",
+        "budget_tokens": 1024
+      }
+    },
+    "output": {
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "<system-reminder>\n# Actual environment (overrides any other environment description)\n - Platform: synthetic-platform; shell: /synthetic/shell; home: /synthetic/home\n - Working directory: /synthetic/project\n - Use POSIX paths with forward slashes (for example ~/.agents/AGENTS.md). There is no C:\\ drive and no PowerShell.\n - Tools that execute here: Bash, Read, Edit, Write, Skill, ToolSearch.\n\nfixture system\n</system-reminder>"
+            },
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ],
+      "thinking": {
+        "type": "adaptive"
+      }
+    }
+  },
+  {
+    "input": {
+      "system": [
+        {
+          "type": "text",
+          "text": "fixture system"
+        }
+      ],
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ]
+    },
+    "output": {
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "<system-reminder>\n# Actual environment (overrides any other environment description)\n - Platform: synthetic-platform; shell: /synthetic/shell; home: /synthetic/home\n - Working directory: /synthetic/project\n - Use POSIX paths with forward slashes (for example ~/.agents/AGENTS.md). There is no C:\\ drive and no PowerShell.\n - Tools that execute here: Bash, Read, Edit, Write, Skill, ToolSearch.\n\nfixture system\n</system-reminder>"
+            },
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "system": [
+        {
+          "type": "text",
+          "text": "fixture system"
+        }
+      ],
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ],
+      "thinking": {
+        "type": "adaptive"
+      }
+    },
+    "output": {
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "<system-reminder>\n# Actual environment (overrides any other environment description)\n - Platform: synthetic-platform; shell: /synthetic/shell; home: /synthetic/home\n - Working directory: /synthetic/project\n - Use POSIX paths with forward slashes (for example ~/.agents/AGENTS.md). There is no C:\\ drive and no PowerShell.\n - Tools that execute here: Bash, Read, Edit, Write, Skill, ToolSearch.\n\nfixture system\n</system-reminder>"
+            },
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ],
+      "thinking": {
+        "type": "adaptive"
+      }
+    }
+  },
+  {
+    "input": {
+      "system": [
+        {
+          "type": "text",
+          "text": "fixture system"
+        }
+      ],
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ],
+      "thinking": {
+        "type": "disabled"
+      }
+    },
+    "output": {
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "<system-reminder>\n# Actual environment (overrides any other environment description)\n - Platform: synthetic-platform; shell: /synthetic/shell; home: /synthetic/home\n - Working directory: /synthetic/project\n - Use POSIX paths with forward slashes (for example ~/.agents/AGENTS.md). There is no C:\\ drive and no PowerShell.\n - Tools that execute here: Bash, Read, Edit, Write, Skill, ToolSearch.\n\nfixture system\n</system-reminder>"
+            },
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "system": [
+        {
+          "type": "text",
+          "text": "fixture system"
+        }
+      ],
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ],
+      "thinking": {
+        "type": "enabled",
+        "budget_tokens": 1024
+      }
+    },
+    "output": {
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "earlier"
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": "<system-reminder>\n# Actual environment (overrides any other environment description)\n - Platform: synthetic-platform; shell: /synthetic/shell; home: /synthetic/home\n - Working directory: /synthetic/project\n - Use POSIX paths with forward slashes (for example ~/.agents/AGENTS.md). There is no C:\\ drive and no PowerShell.\n - Tools that execute here: Bash, Read, Edit, Write, Skill, ToolSearch.\n\nfixture system\n</system-reminder>"
+            },
+            {
+              "type": "text",
+              "text": "hello"
+            }
+          ]
+        }
+      ],
+      "thinking": {
+        "type": "adaptive"
+      }
+    }
+  }
+]

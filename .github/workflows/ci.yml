@@ -1,0 +1,40 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.14'
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: npm install --global @earendil-works/pi-coding-agent@1.0.2 --ignore-scripts
+      - run: bun test tests
+      - run: bun run typecheck
+      - run: git diff --check
+      - run: bun run pack
+      - run: shasum -a 256 --check SHA256SUMS
+        working-directory: dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pipellm-package-${{ matrix.os }}
+          path: |
+            dist/*.tgz
+            dist/*-install.sh
+            dist/SHA256SUMS
+          if-no-files-found: error

@@ -1,0 +1,7 @@
+{
+ "provenance": "Synthetic contract fixtures; no captured gateway payloads or credentials.",
+ "passthrough": {"content":[{"type":"text","text":"cwd=/synthetic/project; platform=darwin"},{"type":"tool_use","name":"canary_probe","id":"synthetic-call","input":{"note":"hi"}}],"usage":{"input_tokens":12,"cache_read_input_tokens":6502,"cache_creation_input_tokens":0}},
+ "substituted": {"content":[{"type":"tool_use","name":"Bash","id":"synthetic-call","input":{"command":"pwd"}}],"usage":{"input_tokens":4,"cache_read_input_tokens":18000}},
+ "forcedChoice": {"error":{"message":"type \"tool\" and \"any\" are not supported"}},
+ "transient": {"error":{"message":"Access to this model is not available for channel program accounts"}}
+}

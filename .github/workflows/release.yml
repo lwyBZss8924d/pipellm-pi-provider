@@ -1,0 +1,137 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag, e.g. v0.3.0
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    outputs:
+      revision: ${{ steps.source.outputs.revision }}
+      tag: ${{ steps.source.outputs.tag }}
+      version: ${{ steps.source.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.14'
+      - id: source
+        name: Bind release to version and commit
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          test "$RELEASE_TAG" = "v$version"
+          revision=$(git rev-parse HEAD)
+          test "$(git rev-list -n 1 "$RELEASE_TAG")" = "$revision"
+          git merge-base --is-ancestor "$revision" origin/main
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: npm install --global @earendil-works/pi-coding-agent@1.0.2 --ignore-scripts
+      - run: bun test tests
+      - run: bun run typecheck
+      - run: git diff --check
+      - run: bun run pack
+      - run: shasum -a 256 --check SHA256SUMS
+        working-directory: dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.source.outputs.revision }}
+          path: |
+            dist/*.tgz
+            dist/*-install.sh
+            dist/SHA256SUMS
+          if-no-files-found: error
+  security:
+    needs: verify
+    # Never trigger this authenticated runner from pull_request events.
+    runs-on: [self-hosted, codex-security-chatgpt]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.verify.outputs.revision }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.14'
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - name: Require existing ChatGPT login on the runner
+        run: |
+          test -n "$CODEX_HOME"
+          bunx --no-install codex-security login status
+      - name: Scan with pinned Codex Security SDK
+        env:
+          CODEX_SECURITY_OUTPUT_DIR: ${{ runner.temp }}/pipellm-security-${{ github.run_id }}-${{ github.run_attempt }}
+        run: bun scripts/security-scan.ts .
+      # Detailed findings and authentication state remain on the runner.
+  publish:
+    needs: [verify, security]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ needs.verify.outputs.revision }}
+          path: dist
+      - name: Verify and publish the tested archive
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_VERSION: ${{ needs.verify.outputs.version }}
+        working-directory: dist
+        run: |
+          shasum -a 256 --check SHA256SUMS
+          node --input-type=module <<'JS'
+          import {readFile} from 'node:fs/promises';
+          import {createHash} from 'node:crypto';
+          import {spawnSync} from 'node:child_process';
+          const archive = `pipellm-pi-provider-${process.env.RELEASE_VERSION}.tgz`;
+          const integrity = 'sha512-' + createHash('sha512').update(await readFile(archive)).digest('base64');
+          const query = spawnSync('npm', ['view', `pipellm-pi-provider@${process.env.RELEASE_VERSION}`, 'dist.integrity', '--json'], {encoding:'utf8'});
+          if (query.status === 0) {
+            if (JSON.parse(query.stdout) !== integrity) throw new Error('Published version has different archive bytes; create a new version');
+            console.log('Identical npm version already published');
+          } else {
+            let error; try { error = JSON.parse(query.stdout).error; } catch {}
+            if (error?.code !== 'E404') throw new Error('Cannot establish npm version availability');
+            const publish = spawnSync('npm', ['publish', archive, '--access', 'public', '--ignore-scripts'], {stdio:'inherit'});
+            if (publish.status !== 0) process.exit(publish.status || 1);
+          }
+          JS
+      - name: Publish GitHub release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.verify.outputs.tag }}
+        run: |
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --title "PipeLLM Pi provider $RELEASE_TAG" --notes 'Compiled Pi extension and standalone Incur CLI, MIT source, macOS Keychain authentication, and checksum-verified standalone installer. Tests and Codex Security SDK release gate passed.'
+          fi
+          gh release upload "$RELEASE_TAG" dist/*.tgz dist/*-install.sh dist/SHA256SUMS --clobber

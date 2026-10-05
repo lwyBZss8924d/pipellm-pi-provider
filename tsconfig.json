@@ -1,0 +1,5 @@
+{
+ "compilerOptions": { "target":"ES2022", "module":"Preserve", "moduleResolution":"Bundler", "strict":true,
+  "noEmit":true, "skipLibCheck":true, "types":["bun"], "resolveJsonModule":true, "esModuleInterop":true },
+ "include":["*.ts", "scripts/**/*.ts", "tests/**/*.ts"], "exclude":[".local", "dist", "node_modules"]
+}
