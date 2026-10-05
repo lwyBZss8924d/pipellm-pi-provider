@@ -1,11 +1,5 @@
 <p align="center">
-  <a href="https://code.pipellm.ai/">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/lwyBZss8924d/pipellm-pi-provider/main/assets/pipellm-code-dark.svg">
-      <img src="https://code.pipellm.ai/assets/logo-GN9Pw8pU.svg" alt="PipeLLM Code" width="192" align="middle">
-    </picture>
-  </a>
-  <a href="https://pi.dev/"><img src="https://pi.dev/logo-auto.svg" alt="Pi" width="48" height="48" align="middle"></a>
+  <a href="https://code.pipellm.ai/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/lwyBZss8924d/pipellm-pi-provider/main/assets/pipellm-code-dark.svg"><img src="https://code.pipellm.ai/assets/logo-GN9Pw8pU.svg" alt="PipeLLM Code" width="180" align="middle"></picture></a> <a href="https://pi.dev/"><img src="https://pi.dev/logo-auto.svg" alt="Pi" width="48" height="48" align="middle"></a>
 </p>
 
 <h1 align="center">pipellm-pi-provider for Pi</h1>
