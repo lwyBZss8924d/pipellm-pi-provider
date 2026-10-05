@@ -30,7 +30,7 @@ This extension uses Pi's [custom provider API](https://pi.dev/docs/latest/custom
 [extension API](https://pi.dev/docs/latest/extensions), and [package format](https://pi.dev/docs/latest/packages).
 Pi provides native streaming, tools, usage reporting, and thinking behavior.
 
-The npm package includes compiled JavaScript, source and tests in `source/`, and dependency notices in `THIRD_PARTY_LICENSES/`.
+The package on the npm registry includes compiled JavaScript, source and tests in `source/`, and dependency notices in `THIRD_PARTY_LICENSES/`.
 The source and package use the [MIT license](LICENSE).
 
 ## Install
@@ -311,3 +311,6 @@ Brand references: [Pi press kit](https://pi.dev/press-kit), [PipeLLM Code](https
 [Codex Security icon](https://github.com/openai/codex-security/blob/main/plugins/codex-security/assets/logo.png).
 The marks identify the host and scan tooling. This package is independently maintained.
 See OpenAI's [security administration documentation](https://learn.chatgpt.com/docs/security-administration) for its service controls.
+
+npm is a registered trademark of npm, Inc.
+See the [npm logo and usage policy](https://docs.npmjs.com/policies/logos-and-usage/).
