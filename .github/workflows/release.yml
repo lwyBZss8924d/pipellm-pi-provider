@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing release tag, e.g. v0.3.0
+        description: Existing release tag, e.g. v0.3.1
         required: true
         type: string
 permissions:
@@ -85,9 +85,10 @@ jobs:
           bunx --no-install codex-security login status
       - name: Scan with pinned Codex Security SDK
         env:
-          CODEX_SECURITY_OUTPUT_DIR: ${{ runner.temp }}/pipellm-security-${{ github.run_id }}-${{ github.run_attempt }}
           CODEX_SECURITY_MODEL: ${{ vars.CODEX_SECURITY_MODEL || 'gpt-6-sol' }}
-        run: bun scripts/security-scan.ts .
+        run: |
+          export CODEX_SECURITY_OUTPUT_DIR="$RUNNER_TEMP/pipellm-security-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          bun scripts/security-scan.ts .
       # Detailed findings and authentication state remain on the runner.
   publish-npm:
     needs: [verify, security]

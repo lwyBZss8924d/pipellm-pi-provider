@@ -10,15 +10,15 @@ includes corresponding sources and tests under `source/`, and bundled CLI depend
 Register the extension with Pi:
 
 ```sh
-pi install npm:pipellm-pi-provider@0.3.0
+pi install npm:pipellm-pi-provider@0.3.1
 ```
 
 Install the independent CLI, or run it without a global installation:
 
 ```sh
-npm install -g pipellm-pi-provider@0.3.0
+npm install -g pipellm-pi-provider@0.3.1
 pipellm-pi-provider --help
-npx --yes --package=pipellm-pi-provider@0.3.0 pipellm-pi-provider --help
+npx --yes --package=pipellm-pi-provider@0.3.1 pipellm-pi-provider --help
 ```
 
 The CLI requires Node.js 22+. `npm install` installs the CLI; `pi install` registers the extension.
@@ -28,7 +28,7 @@ You can also install directly from
 [GitHub Releases](https://github.com/lwyBZss8924d/pipellm-pi-provider/releases):
 
 ```sh
-curl -fL https://github.com/lwyBZss8924d/pipellm-pi-provider/releases/download/v0.3.0/pipellm-pi-provider-0.3.0-install.sh -o pipellm-pi-provider-0.3.0-install.sh && sh pipellm-pi-provider-0.3.0-install.sh
+curl -fL https://github.com/lwyBZss8924d/pipellm-pi-provider/releases/download/v0.3.1/pipellm-pi-provider-0.3.1-install.sh -o pipellm-pi-provider-0.3.1-install.sh && sh pipellm-pi-provider-0.3.1-install.sh
 ```
 
 The installer embeds the `.tgz`, verifies its SHA-256 and delegates registration to `pi install`.

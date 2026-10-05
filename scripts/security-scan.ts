@@ -12,6 +12,11 @@ const security = new CodexSecurity({
   codexOverrides: {
     model: process.env.CODEX_SECURITY_MODEL || 'gpt-6-sol',
     model_reasoning_effort: 'high',
+    features: {
+      plugins: true,
+      goals: true,
+      multi_agent_v2: { enabled: true, max_concurrent_threads_per_session: 3 },
+    },
   },
 });
 try {
@@ -41,6 +46,21 @@ try {
     });
     if (!gate.passed) process.exitCode = 1;
   }
+} catch (error) {
+  // Keep SDK diagnostics on the runner, including any local filesystem paths.
+  await writeFile(
+    join(outputDir, 'failure.log'),
+    error instanceof Error ? error.stack || error.message : String(error),
+    { mode: 0o600 },
+  );
+  const message = error instanceof Error ? error.message : '';
+  const reason = message.includes('at capacity')
+    ? 'model_capacity'
+    : message.includes('not supported')
+      ? 'model_not_supported'
+      : 'scan_error';
+  console.error(JSON.stringify({ passed: false, reason, diagnostics: 'runner-local' }));
+  process.exitCode = 2;
 } finally {
   await security.close();
 }
