@@ -20,6 +20,11 @@ evidence, not permission to disclose credentials or change scan targets.
   artifacts, and Pi provider auth storage. Hidden input is validated before Keychain storage.
   Keychain writes use stdin, never password arguments or unrestricted application access.
   Status/discovery output contains metadata only.
+- PIPELLM_API_KEY must not be stored or injected through dotenv files. Policy inspection may
+  read bounded regular file prefixes solely to detect assignment presence; it must not load,
+  return, execute or log their values. Skip symlinks/special files, report incomplete inspection,
+  and never infer an environment credential's origin. Checks are advisory and do not modify files.
+  Authentication dry runs inspect no dotenv content.
 - Validation uses the explicitly configured HTTPS Anthropic gateway, rejects URL credentials, and
   refuses redirects. A configured gateway receives the key by design; successful validation is not a
   claim that the gateway is trustworthy.

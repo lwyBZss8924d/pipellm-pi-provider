@@ -25,14 +25,14 @@ The CLI requires Node.js 22+. `npm install` installs the CLI; `pi install` regis
 Host Pi packages are optional peers and are not bundled.
 
 These commands use npm's `latest` release. To pin an audited version for a team or
-reproducible setup, use `pi install npm:pipellm-pi-provider@0.3.2` instead. The published manifest
+reproducible setup, use `pi install npm:pipellm-pi-provider@0.3.3` instead. The published manifest
 includes the `pi-package` keyword for discovery in the [Pi package gallery](https://pi.dev/packages).
 
 You can also install directly from
 [GitHub Releases](https://github.com/lwyBZss8924d/pipellm-pi-provider/releases):
 
 ```sh
-curl -fL https://github.com/lwyBZss8924d/pipellm-pi-provider/releases/download/v0.3.2/pipellm-pi-provider-0.3.2-install.sh -o pipellm-pi-provider-0.3.2-install.sh && sh pipellm-pi-provider-0.3.2-install.sh
+curl -fL https://github.com/lwyBZss8924d/pipellm-pi-provider/releases/download/v0.3.3/pipellm-pi-provider-0.3.3-install.sh -o pipellm-pi-provider-0.3.3-install.sh && sh pipellm-pi-provider-0.3.3-install.sh
 ```
 
 The installer embeds the `.tgz`, verifies its SHA-256 and delegates registration to `pi install`.
@@ -60,6 +60,17 @@ discovered automatically. A successful login is used for the current session; ot
 takes precedence over Keychain. Existing Keychain service labels are preserved when a cached key is
 updated.
 
+**Do not save or inject `PIPELLM_API_KEY` through `.env` files.** Use Keychain on macOS. Where
+environment credentials are necessary, have an authorized secret manager inject them only into
+the child process. The extension never loads dotenv files as credential sources.
+
+At startup, after configuration, and on `/pipellm-status`, Pi checks the current project and Pi agent
+directory for `.env`/`.env.*` key assignments and known dotenv loader indicators. Only fixed warnings
+and boolean flags are shown; file values and paths are not printed. Inspection is bounded to 32
+regular files and the first 64 KiB of each; symlinks and special files are skipped. Incomplete
+inspection is reported. An inherited environment variable's origin cannot be proven, so its source
+is reported as unverified with a reminder to avoid dotenv. The check does not modify files.
+
 The input is masked. Login confirms the destination/model, sends one minimal Anthropic Messages
 request, saves only a valid key and verifies the Keychain write. The `security` subprocess receives
 the key on stdin, never argv. Cancellation, validation failure or denied access does not save an
@@ -85,6 +96,7 @@ pipellm-pi-provider config show --json
 pipellm-pi-provider config set --base-url https://cc-api.pipellm.ai/anthropic --model claude-sonnet-5-5 --dry-run --json
 pipellm-pi-provider config set --base-url https://cc-api.pipellm.ai/anthropic --model claude-sonnet-5-5
 pipellm-pi-provider auth discover --json
+pipellm-pi-provider auth policy --json
 pipellm-pi-provider auth login --model claude-sonnet-5-5 --dry-run --json
 pipellm-pi-provider auth login --model claude-sonnet-5-5 --yes
 pipellm-pi-provider auth check --model claude-sonnet-5-5 --yes --json
@@ -96,6 +108,12 @@ authorized agents, inject `PIPELLM_API_KEY` into the child environment and use
 `auth login --from-env --yes --json`. Never paste a key into arguments or a conversation. `--yes`
 authorizes a validation request; dry runs send none and read no key. `auth check` does not write
 credentials.
+
+`auth policy` checks dotenv definitions and injection indicators without resolving Keychain keys
+or sending requests. `status`, `auth discover` and `doctor` include the same policy flags and fixed
+warnings. Dotenv inspection reads only a bounded prefix to detect the variable name; it does not
+import or return file values. Authentication dry runs show the policy reminder without inspecting
+dotenv contents. Interactive CLI login/check also display the reminder.
 
 Use `--agent-dir DIR` or `PI_CODING_AGENT_DIR` for isolated configurations. Incur provides
 `--schema --json`, `--llms --json`, field filters, JSON/JSONL, token limits, completion generation
@@ -151,6 +169,13 @@ bun install --frozen-lockfile
 bun test tests
 bun run typecheck
 bun run pack
+```
+
+To register the locally built installer, use the manifest version:
+
+```sh
+package_version=$(node -p 'require("./package.json").version')
+sh "dist/pipellm-pi-provider-${package_version}-install.sh"
 ```
 
 `dist/` contains the compiled npm `.tgz`, standalone installer and `SHA256SUMS`. GitHub CI checks

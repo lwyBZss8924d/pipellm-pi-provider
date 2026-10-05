@@ -1,6 +1,6 @@
 {
   "name": "pipellm-pi-provider",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "description": "MIT PipeLLM Pi extension with gateway setup, macOS Keychain authentication, and a nonblocking tool observer.",
   "type": "module",

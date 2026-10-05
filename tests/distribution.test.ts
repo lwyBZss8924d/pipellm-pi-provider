@@ -285,6 +285,16 @@ test('npm archive exposes a standalone CLI bin, schemas and safe configuration p
   expect(refused.exit).toBe(1);
   expect(JSON.parse(refused.stdout).error.code).toBe('CONFIRM_REQUIRED');
   expect(refused.stdout + refused.stderr).not.toContain('synthetic-private');
+  await writeFile(join(agentDir, '.env.local'), 'PIPELLM_API_KEY=synthetic-dotenv-secret\n');
+  const policy = await run([bin, 'auth', 'policy', '--agent-dir', agentDir], sandbox, {
+    PIPELLM_API_KEY: '',
+  });
+  expect(policy.exit).toBe(0);
+  expect(JSON.parse(policy.stdout).data.dotenvKeyDetected).toBe(true);
+  expect(policy.stdout + policy.stderr).not.toContain('synthetic-dotenv-secret');
+  expect(await readFile(join(agentDir, '.env.local'), 'utf8')).toBe(
+    'PIPELLM_API_KEY=synthetic-dotenv-secret\n',
+  );
   const npx = await run(
     ['npm', 'exec', '--offline', '--prefix', prefix, '--', 'pipellm-pi-provider', '--version'],
     prefix,

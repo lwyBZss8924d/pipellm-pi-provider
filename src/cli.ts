@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { MacKeychain, validKey } from './keychain';
 import { gatewayUrl, modelsPath, saveGateway, validateKey } from './gateway-config';
 import { SecretInput } from './secret-input';
+import { DOTENV_REMINDER, inspectCredentialPolicy } from './credential-policy';
 import manifest from '../package.json';
 
 const keychain = new MacKeychain();
@@ -40,7 +41,7 @@ async function gateway(agentDir?: string) {
     throw new Error('Cannot read PipeLLM configuration; check models.json syntax and permissions');
   }
 }
-async function discovery() {
+async function discovery(agentDir?: string) {
   const environment = !!process.env.PIPELLM_API_KEY;
   const stored = keychain.supported && (await keychain.available());
   return {
@@ -50,6 +51,7 @@ async function discovery() {
     keychain: stored,
     keychainSupported: keychain.supported,
     op: 'planned',
+    policy: await inspectCredentialPolicy({ agentDir }),
   };
 }
 async function hiddenKey(): Promise<string | undefined> {
@@ -99,7 +101,7 @@ cli.command('status', {
         version: manifest.version,
         modelsPath: pathFor(c.options.agentDir),
         gateway: await gateway(c.options.agentDir),
-        auth: await discovery(),
+        auth: await discovery(c.options.agentDir),
       };
     } catch {
       return c.error({
@@ -181,10 +183,11 @@ const auth = Cli.create('auth', {
   description: 'Discover, validate, and securely store a PipeLLM key',
 });
 auth.command('discover', {
-  description: 'Discover environment/Keychain presence without printing or loading the key',
+  description: 'Inspect credential presence and dotenv policy without resolving credentials',
+  options: z.object(scope),
   async run(c) {
     try {
-      return await discovery();
+      return await discovery(c.options.agentDir);
     } catch {
       return c.error({
         code: 'KEYCHAIN_DENIED',
@@ -192,6 +195,14 @@ auth.command('discover', {
         retryable: true,
       });
     }
+  },
+});
+auth.command('policy', {
+  description:
+    'Check for dotenv key definitions/injection indicators; report only flags and fixed warnings',
+  options: z.object(scope),
+  async run(c) {
+    return await inspectCredentialPolicy({ agentDir: c.options.agentDir });
   },
 });
 const authOptions = {
@@ -239,6 +250,7 @@ auth.command('login', {
           model: model.id,
           storage: 'macOS Keychain',
           sendsRequest: false,
+          credentialPolicy: DOTENV_REMINDER,
         };
       if (!o.yes)
         return c.error({
@@ -253,6 +265,8 @@ auth.command('login', {
           retryable: false,
         });
       if (o.fromEnv && o.stdin) throw new Error('Choose one key source');
+      const policy = await inspectCredentialPolicy({ agentDir: o.agentDir });
+      if (process.stderr.isTTY) process.stderr.write(DOTENV_REMINDER + '\n');
       key = o.fromEnv
         ? process.env.PIPELLM_API_KEY
         : o.stdin
@@ -267,6 +281,7 @@ auth.command('login', {
         saved: true,
         storage: 'macOS Keychain',
         plaintextAuthWritten: false,
+        credentialPolicy: policy,
       };
     } catch {
       return c.error({
@@ -297,17 +312,25 @@ auth.command('check', {
           retryable: false,
         });
       if (o.dryRun)
-        return { dryRun: true, target: model.baseUrl, model: model.id, sendsRequest: false };
+        return {
+          dryRun: true,
+          target: model.baseUrl,
+          model: model.id,
+          sendsRequest: false,
+          credentialPolicy: DOTENV_REMINDER,
+        };
       if (!o.yes)
         return c.error({
           code: 'CONFIRM_REQUIRED',
           message: 'Use --yes to authorize a validation request',
           retryable: false,
         });
+      const policy = await inspectCredentialPolicy({ agentDir: o.agentDir });
+      if (process.stderr.isTTY) process.stderr.write(DOTENV_REMINDER + '\n');
       const key = process.env.PIPELLM_API_KEY || (await keychain.read());
       if (!key || !validKey(key)) throw new Error('No valid key found');
       await validateKey(key, model);
-      return { validated: true, saved: false, model: model.id };
+      return { validated: true, saved: false, model: model.id, credentialPolicy: policy };
     } catch {
       return c.error({
         code: 'CHECK_FAILED',
@@ -326,7 +349,7 @@ cli.command('doctor', {
   async run(c) {
     try {
       const configured = await gateway(c.options.agentDir);
-      const auth = await discovery();
+      const auth = await discovery(c.options.agentDir);
       return {
         ready:
           Number(process.versions.node.split('.')[0]) >= 22 &&
@@ -340,6 +363,7 @@ cli.command('doctor', {
           credentialsAvailable: auth.available,
           keychainSupported: auth.keychainSupported,
         },
+        credentialPolicy: auth.policy,
         next: !configured.configured
           ? 'config set'
           : !auth.available

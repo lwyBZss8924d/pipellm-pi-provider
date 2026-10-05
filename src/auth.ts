@@ -2,12 +2,14 @@ import type { Provider } from '@earendil-works/pi-ai';
 import type { ExtensionAPI, ExtensionCommandContext } from '@earendil-works/pi-coding-agent';
 import { MacKeychain, validKey } from './keychain';
 import { gatewayUrl, messagesUrl, saveGateway, validateKey } from './gateway-config';
+import { inspectCredentialPolicy } from './credential-policy';
 import { SecretInput } from './secret-input';
 
 export function registerGateway(
   pi: ExtensionAPI,
   keychain = new MacKeychain(),
   validate = validateKey,
+  inspect = inspectCredentialPolicy,
 ) {
   let sessionKey: string | undefined;
   const provider: Provider = {
@@ -45,6 +47,11 @@ export function registerGateway(
   // Native provider registration refreshes availability asynchronously in Pi 1.0.2.
   // Await a fresh snapshot before startup model listing/selection completes.
   pi.on('session_start', async (_event, ctx) => {
+    const policy = await inspect({ cwd: ctx.cwd });
+    ctx.ui.notify(
+      policy.warnings.length ? policy.warnings.join('\n') : policy.recommendation,
+      policy.warnings.length ? 'warning' : 'info',
+    );
     await ctx.modelRegistry.refresh({ allowNetwork: false });
   });
   const interactive = (args: string, ctx: ExtensionCommandContext) => {
@@ -115,6 +122,8 @@ export function registerGateway(
           `Saved ${saved.path}${saved.backup ? '; previous file backed up' : ''}. Use /pipellm-login, then /model pipellm/${id}.`,
           'info',
         );
+        const policy = await inspect({ cwd: ctx.cwd });
+        if (policy.warnings.length) ctx.ui.notify(policy.warnings.join('\n'), 'warning');
       } catch {
         ctx.ui.notify(
           'Could not save PipeLLM configuration. Check HTTPS URL, model ID, token limits, and models.json permissions.',
@@ -203,6 +212,8 @@ export function registerGateway(
           `PipeLLM models: ${count}; credential available: ${available ? 'yes' : 'no'}; Keychain: ${keychain.supported ? 'macOS' : 'unsupported'}.`,
           'info',
         );
+        const policy = await inspect({ cwd: ctx.cwd });
+        if (policy.warnings.length) ctx.ui.notify(policy.warnings.join('\n'), 'warning');
       } catch {
         ctx.ui.notify('Could not check macOS Keychain availability.', 'warning');
       }
