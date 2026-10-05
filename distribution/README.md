@@ -27,7 +27,7 @@ npx --yes pipellm-pi-provider --help
 
 `pi install` registers the extension; `npm install` installs the CLI. Node.js 22+ is required.
 Pi host packages are optional peers and are not bundled. Default commands use npm's `latest`;
-use `pi install npm:pipellm-pi-provider@0.3.5` to pin a reproducible version. The package declares
+use `pi install npm:pipellm-pi-provider@0.3.6` to pin a reproducible version. The package declares
 `pi-package` for discovery in the [Pi gallery](https://pi.dev/packages).
 
 Alternatively, install the compiled package from the latest GitHub Release:
@@ -153,6 +153,12 @@ Provision ChatGPT login with `codex login --device-auth`; verify `codex login st
 CLI rather than the SDK's older bundled runtime. Select an account-supported model with the
 `CODEX_SECURITY_MODEL` repository variable; the fallback is `gpt-6.1-sol` with high reasoning. Device login does not guarantee model
 access. Pull requests run only on hosted runners without this login state.
+
+Set `CODEX_SECURITY_SERVICE_TIER=fast` as a repository variable to enable Fast mode for a
+supported model/account; omission uses Standard (`default`). Reasoning remains `high`.
+[Fast mode](https://learn.chatgpt.com/docs/agent-configuration/speed) uses about 2.5 times the
+included subscription allowance, or 2 times purchased credits. It accelerates model generation;
+tool calls and validation still take time. CI logs only elapsed time and aggregate scan progress.
 
 Publication rejects scan errors, incomplete coverage/deferred review and high/critical findings.
 Reports stay private under `$CODEX_HOME/pipellm-release-scans/`; see [SECURITY.md](SECURITY.md).

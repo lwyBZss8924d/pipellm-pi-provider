@@ -1,6 +1,6 @@
 {
   "name": "pipellm-pi-provider",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "private": true,
   "description": "PipeLLM provider for Pi with gateway configuration, Keychain login, and CLI management.",
   "type": "module",

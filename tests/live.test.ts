@@ -2,12 +2,16 @@ import { beforeAll, describe, expect, test } from 'bun:test';
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { classifyResponse, classifySize, retryForcedToolChoice } from '../src/classify';
+import { messagesUrl } from '../src/gateway-config';
 
 // No calls or credential lookups unless explicitly enabled.
 describe.skipIf(process.env.PIPELLM_LIVE !== '1')('live PipeLLM contracts', () => {
   let key: string;
   const base = process.env.PIPELLM_BASE_URL || 'https://cc-api.pipellm.ai/anthropic';
+  let endpoint: string;
   beforeAll(() => {
+    // Validate the destination before resolving any real credential.
+    endpoint = messagesUrl(base);
     key =
       process.env.PIPELLM_API_KEY ||
       (process.platform === 'darwin'
@@ -19,8 +23,9 @@ describe.skipIf(process.env.PIPELLM_LIVE !== '1')('live PipeLLM contracts', () =
     if (!key) throw new Error('PipeLLM key unavailable through environment or Keychain');
   });
   async function post(body: Record<string, unknown>) {
-    const response = await fetch(`${base.replace(/\/$/, '')}/v1/messages`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
+      redirect: 'error',
       headers: {
         'x-api-key': key,
         'anthropic-version': '2023-06-01',

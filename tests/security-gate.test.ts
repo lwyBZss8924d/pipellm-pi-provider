@@ -14,6 +14,7 @@ test('release scanner configuration passes the pinned SDK offline preflight', as
         CODEX_HOME: join(temporary, 'codex-home'),
         CODEX_SECURITY_OUTPUT_DIR: join(temporary, 'reports'),
         CODEX_SECURITY_MODEL: 'gpt-6.1-sol',
+        CODEX_SECURITY_SERVICE_TIER: 'fast',
       },
       stdout: 'pipe',
       stderr: 'pipe',
@@ -30,6 +31,7 @@ test('release scanner configuration passes the pinned SDK offline preflight', as
       authentication: 'stored_credentials',
       model: 'gpt-6.1-sol',
       codexVersion: '0.160.0',
+      serviceTier: 'fast',
     });
   } finally {
     await rm(temporary, { recursive: true, force: true });
