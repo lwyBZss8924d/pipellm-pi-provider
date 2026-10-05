@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, realpath, rename, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -39,6 +39,14 @@ export async function saveGateway(baseUrl: string, model: GatewayModel, path = m
   ) {
     throw new Error('Invalid model identifier or token limits');
   }
+  let entry;
+  try {
+    entry = await lstat(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  // Resolve a file symlink before atomic replacement; a dangling link fails unchanged.
+  if (entry?.isSymbolicLink()) path = await realpath(path);
   await mkdir(dirname(path), { recursive: true });
   let original: string | undefined;
   try {
@@ -67,11 +75,22 @@ export async function saveGateway(baseUrl: string, model: GatewayModel, path = m
   )
     throw new Error('Invalid PipeLLM configuration');
   const { apiKey: _key, headers: _headers, authHeader: _authHeader, ...safePrevious } = previous;
+  if (
+    _headers !== undefined &&
+    (!_headers || typeof _headers !== 'object' || Array.isArray(_headers))
+  )
+    throw new Error('Invalid PipeLLM headers');
+  const headers = Object.fromEntries(
+    Object.entries(_headers ?? {}).filter(
+      ([name]) => !/^(?:authorization|proxy-authorization|x-api-key|api-key)$/i.test(name),
+    ),
+  );
   // Preserve other providers and model entries; selected model has no literal auth headers.
   config.providers = {
     ...config.providers,
     pipellm: {
       ...safePrevious,
+      ...(Object.keys(headers).length ? { headers } : {}),
       api: 'anthropic-messages',
       baseUrl,
       apiKey:

@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { lstat, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { MacKeychain, KEY_ACCOUNT, validKey, type SecurityRunner } from '../src/keychain';
@@ -108,7 +108,7 @@ test('legacy account-only discovery works; denied access does not masquerade as 
   await expect(denied.read()).rejects.toThrow('access failed');
   await expect(denied.store(key)).rejects.toThrow('access failed');
 });
-test('masked TUI input never renders a secret, handles bracketed paste and clears on escape', () => {
+test('masked TUI input never renders a secret, handles bracketed paste and clears on escape', async () => {
   const values: (string | undefined)[] = [];
   const input = new SecretInput(
     (value) => values.push(value),
@@ -127,6 +127,7 @@ test('masked TUI input never renders a secret, handles bracketed paste and clear
   );
   cancelled.handleInput(key);
   cancelled.handleInput('\x1b');
+  await Bun.sleep(75);
   expect(values.at(-1)).toBeUndefined();
   expect(cancelled.render(80)[1]).toBe('');
 });
@@ -157,6 +158,143 @@ test('validation uses one HTTPS request, refuses redirects, and redacts server e
   await expect(
     validateKey(key, model, (async () => new Response(JSON.stringify({ error: key }))) as any),
   ).rejects.toThrow('unexpected validation response');
+});
+test('masked input retains text around complete and split escape sequences without submitting pasted newlines', () => {
+  const values: (string | undefined)[] = [];
+  const input = new SecretInput(
+    (v) => values.push(v),
+    () => {},
+  );
+  input.handleInput('synthetic-\x1b[Asecret');
+  input.handleInput('\x1b[');
+  input.handleInput('1;5C-123456');
+  input.handleInput('\r');
+  expect(values).toEqual([key]);
+  expect(input.render(80).join('\n')).not.toContain(key);
+  input.handleInput('\x1b[20');
+  input.handleInput('0~' + key + '\r\n\x1b[201');
+  input.handleInput('~');
+  expect(values).toEqual([key]);
+  input.handleInput('\r');
+  expect(values).toEqual([key, key]);
+  input.handleInput('\x1b');
+  input.handleInput('[A' + key);
+  expect(values).toEqual([key, key]);
+  input.handleInput('\r');
+  expect(values).toEqual([key, key, key]);
+});
+test('disposing masked input cancels a pending ESC callback and clears the secret', async () => {
+  const values: (string | undefined)[] = [];
+  const input = new SecretInput(
+    (v) => values.push(v),
+    () => {},
+  );
+  input.handleInput(key);
+  input.handleInput('\x1b');
+  input.dispose();
+  await Bun.sleep(75);
+  expect(values).toEqual([]);
+  expect(input.render(80)[1]).toBe('');
+});
+test('ESC cancellation does not redraw a credential prompt after its owner closes input', async () => {
+  const events: string[] = [];
+  const input = new SecretInput(
+    () => {
+      events.push('done');
+      input.dispose();
+    },
+    () => events.push('redraw'),
+  );
+  input.handleInput(key);
+  events.length = 0;
+  input.handleInput('\x1b');
+  await Bun.sleep(75);
+  expect(events).toEqual(['done']);
+});
+test('gateway writes preserve file symlinks and unrelated headers, and reject dangling links unchanged', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'pipellm-symlink-'));
+  try {
+    const target = join(dir, 'shared-models.json');
+    const path = join(dir, 'models.json');
+    const original = JSON.stringify({
+      providers: {
+        pipellm: {
+          models: [{ id: 'keep' }],
+          authHeader: true,
+          headers: {
+            'X-Custom': 'keep',
+            'anthropic-beta': 'synthetic-beta',
+            AUTHORIZATION: 'synthetic-private-header',
+            'X-Api-Key': 'synthetic-private-key',
+          },
+        },
+      },
+    });
+    await writeFile(target, original);
+    await symlink('shared-models.json', path);
+    const saved = await saveGateway(model.baseUrl, declaration, path);
+    expect((await lstat(path)).isSymbolicLink()).toBe(true);
+    expect(await readFile(saved.backup!, 'utf8')).toBe(original);
+    const next = JSON.parse(await readFile(target, 'utf8'));
+    expect(next.providers.pipellm.headers).toEqual({
+      'X-Custom': 'keep',
+      'anthropic-beta': 'synthetic-beta',
+    });
+    expect(next.providers.pipellm.authHeader).toBeUndefined();
+    expect(next.providers.pipellm.models.map((m: any) => m.id)).toEqual(['keep', model.id]);
+    expect((await stat(target)).mode & 0o777).toBe(0o600);
+    const dangling = join(dir, 'dangling.json');
+    await symlink('missing-target.json', dangling);
+    await expect(saveGateway(model.baseUrl, declaration, dangling)).rejects.toThrow();
+    expect((await lstat(dangling)).isSymbolicLink()).toBe(true);
+    expect((await readdir(dir)).filter((name) => name.includes('pipellm-backup'))).toHaveLength(1);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+test('credential policy notices occur once for PipeLLM activation and remain silent for other providers', async () => {
+  const handlers = new Map<string, any>();
+  const notices: string[] = [];
+  let inspections = 0;
+  let refreshes = 0;
+  registerGateway(
+    {
+      on: (n: string, h: any) => handlers.set(n, h),
+      registerProvider: () => {},
+      registerCommand: () => {},
+    } as any,
+    memoryKeychain().store,
+    async () => {},
+    async () => {
+      inspections++;
+      return {
+        warnings: ['synthetic warning'],
+        recommendation: '',
+        dotenvKeyDetected: false,
+        dotenvInjectionDetected: false,
+        environmentSourceUnverified: true,
+        inspectionIncomplete: false,
+      };
+    },
+  );
+  const ctx: any = {
+    model: { provider: 'other' },
+    cwd: '.',
+    modelRegistry: {
+      refresh: async () => {
+        refreshes++;
+      },
+    },
+    ui: { notify: (m: string) => notices.push(m) },
+  };
+  await handlers.get('session_start')({}, ctx);
+  expect(inspections).toBe(0);
+  expect(notices).toEqual([]);
+  expect(refreshes).toBe(1);
+  await handlers.get('model_select')({ model }, ctx);
+  await handlers.get('model_select')({ model }, ctx);
+  expect(notices).toEqual(['synthetic warning']);
+  expect(inspections).toBe(1);
 });
 test('gateway configuration merges other providers/models, backs up exact bytes, and stores no entered secret', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'pipellm-config-'));

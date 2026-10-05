@@ -4,7 +4,13 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const output = join(root, 'dist');
+const outputArg = process.argv.indexOf('--out-dir');
+if (
+  outputArg !== -1 &&
+  (!process.argv[outputArg + 1] || process.argv[outputArg + 1].startsWith('--'))
+)
+  throw new Error('--out-dir requires a directory');
+const output = outputArg === -1 ? join(root, 'dist') : resolve(process.argv[outputArg + 1]);
 const stage = join(output, 'package');
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(manifest.version))

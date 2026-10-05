@@ -6,9 +6,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import manifest from '../package.json';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const output = join(root, 'dist');
-const installer = join(output, `${manifest.name}-install.sh`);
-const archive = join(output, `${manifest.name}-${manifest.version}.tgz`);
+let output: string;
+let installer: string;
+let archive: string;
 const installedPath = (process.env.PATH || '')
   .split(delimiter)
   .filter((p) => !p.endsWith('/node_modules/.bin'))
@@ -40,12 +40,109 @@ async function run(args: string[], cwd = root, env: NodeJS.ProcessEnv = {}) {
 
 beforeAll(async () => {
   sandbox = await mkdtemp(join(tmpdir(), 'pipellm-release-'));
-  const built = await run([process.execPath, 'run', 'pack']);
+  output = join(sandbox, 'dist');
+  installer = join(output, `${manifest.name}-install.sh`);
+  archive = join(output, `${manifest.name}-${manifest.version}.tgz`);
+  const built = await run([process.execPath, 'run', 'pack', '--out-dir', output]);
   expect(built.exit).toBe(0);
 }, 35000);
 afterAll(async () => {
   await rm(sandbox, { recursive: true, force: true });
 });
+
+test('compiled Bun CLI exits after commands and exposes no auto-served default handler', async () => {
+  const entry = join(output, 'package/dist/cli.js');
+  const scoped = { PI_CODING_AGENT_DIR: join(sandbox, 'bun-cli-agent'), PIPELLM_API_KEY: '' };
+  for (const args of [
+    ['--version'],
+    ['--help'],
+    ['config', 'set', '--schema', '--json'],
+    [
+      'config',
+      'set',
+      '--base-url',
+      'https://example.invalid/anthropic',
+      '--model',
+      'synthetic',
+      '--dry-run',
+    ],
+  ]) {
+    const result = await run([process.execPath, '--no-env-file', entry, ...args], sandbox, scoped);
+    expect(result.exit).toBe(0);
+    expect(result.stdout + result.stderr).not.toContain('Started development server');
+  }
+  const exported = await run(
+    [
+      process.execPath,
+      '--no-env-file',
+      '-e',
+      `const m = await import(${JSON.stringify(pathToFileURL(entry).href)}); console.log('default' in m);`,
+    ],
+    sandbox,
+    scoped,
+  );
+  expect(exported.exit).toBe(0);
+  expect(exported.stdout.trim()).toBe('false');
+  expect(await Bun.file(join(scoped.PI_CODING_AGENT_DIR, 'models.json')).exists()).toBe(false);
+}, 35000);
+
+test('compiled CLI preserves explicit MCP over stdio without an HTTP server', async () => {
+  const proc = Bun.spawn(
+    [process.execPath, '--no-env-file', join(output, 'package/dist/cli.js'), '--mcp'],
+    {
+      cwd: sandbox,
+      env: {
+        PATH: process.env.PATH,
+        HOME: sandbox,
+        PI_CODING_AGENT_DIR: join(sandbox, 'mcp-agent'),
+        PIPELLM_API_KEY: '',
+      },
+      stdin: 'pipe',
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+  );
+  const timeout = setTimeout(() => proc.kill(), 10000);
+  try {
+    proc.stdin.write(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-03-26',
+          capabilities: {},
+          clientInfo: { name: 'synthetic-test', version: '1.0.0' },
+        },
+      }) + '\n',
+    );
+    const reader = proc.stdout.getReader();
+    const first = await reader.read();
+    const response = JSON.parse(new TextDecoder().decode(first.value).trim());
+    expect(response.id).toBe(1);
+    expect(response.result.serverInfo.name).toBe(manifest.name);
+    expect(response.result.capabilities.tools).toBeDefined();
+    proc.stdin.end();
+    const remaining = (async () => {
+      let out = '';
+      for (;;) {
+        const chunk = await reader.read();
+        if (chunk.done) return out;
+        out += new TextDecoder().decode(chunk.value);
+      }
+    })();
+    const [exit, out, err] = await Promise.all([
+      proc.exited,
+      remaining,
+      new Response(proc.stderr).text(),
+    ]);
+    expect(exit).toBe(0);
+    expect(out + err).not.toContain('Started development server');
+  } finally {
+    clearTimeout(timeout);
+    proc.kill();
+  }
+}, 15000);
 
 test('release ships compiled entry, corresponding OSS sources and license without private state', async () => {
   const listed = await run(['tar', '-tzf', archive]);

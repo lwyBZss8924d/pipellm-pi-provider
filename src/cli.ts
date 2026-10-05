@@ -390,4 +390,6 @@ if (process.argv[1] && (await realpath(process.argv[1])) === fileURLToPath(impor
   }
   await cli.serve(argv);
 }
-export default cli;
+// A default export with fetch() makes Bun auto-start an unauthenticated HTTP server.
+// CLI execution and explicitly requested stdio MCP stay in cli.serve() above.
+export { cli };

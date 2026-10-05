@@ -57,7 +57,7 @@ npx --yes pipellm-pi-provider --help
 `pi install` registers the extension. `npm install` installs the independent CLI. Both require Node.js 22 or later.
 Pi host packages are optional peers. The package does not bundle them.
 
-Default commands install npm `latest`. To select a fixed version, use `pi install npm:pipellm-pi-provider@0.3.7`.
+Default commands install npm `latest`. To select a fixed version, use `pi install npm:pipellm-pi-provider@0.3.8`.
 The `pi-package` keyword enables discovery in the [Pi package gallery](https://pi.dev/packages).
 
 <details>
@@ -120,6 +120,10 @@ Metadata commands never resolve Keychain passwords.
 `models.json` stores a credential reference. This extension never reads or writes Pi's `auth.json` and ignores its legacy credential.
 Native `/login pipellm` directs you to `/pipellm-login`.
 
+On macOS, configuration uses an environment-first Keychain command so models also work with extensions disabled. Pi resolves this command before extension authentication. Keychain-only requests can read the key twice, and model availability can show a command as configured without checking its result. Use `/pipellm-status` for credential metadata. Rerun gateway configuration to replace an older Keychain-only command.
+
+Configuration updates preserve non-authentication headers and file symlinks. Backups use private permissions and remain until you remove them.
+
 **Do not save or inject `PIPELLM_API_KEY` through `.env` files.**
 Use Keychain on macOS. On other platforms, use an authorized secret manager to inject the key into the child process.
 The extension never loads dotenv credentials. It checks for dotenv use and shows fixed warnings without changing files.
@@ -127,7 +131,7 @@ The extension never loads dotenv credentials. It checks for dotenv use and shows
 <details>
 <summary>Dotenv checks and their limits</summary>
 
-Startup, configuration, and status inspect project and Pi agent directories for key assignments and loader indicators.
+PipeLLM activation, configuration, and status inspect project and Pi agent directories for key assignments and loader indicators.
 Inspection covers up to 32 regular `.env` or `.env.*` files and 64 KiB per file.
 It skips symlinks and special files, and reports incomplete checks.
 Checks return fixed warnings and flags. They never include values or paths.
@@ -175,11 +179,12 @@ The metadata commands above include dotenv-policy flags. Interactive login and c
 Use `--agent-dir DIR` or `PI_CODING_AGENT_DIR` for isolated settings.
 The [Incur CLI](https://github.com/wevm/incur) supports schemas, field filters, JSON/JSONL, token limits, completions, and optional MCP/skill integration.
 Use `--schema --json` or `--llms --json` to discover commands.
+The CLI does not start an HTTP listener. Explicit `--mcp` uses stdin and stdout.
 Non-TTY output defaults to `{ ok, data/error, meta }` JSON envelopes.
 
 ## Compatibility and removal
 
-Tests cover Pi 1.0.2. Compatible forks must provide the JavaScript extension loader, native custom-provider API, commands, and TUI contracts.
+Tests cover Pi 1.0.2 and 1.0.3. Compatible forks must provide the JavaScript extension loader, native custom-provider API, commands, and TUI contracts.
 Package metadata alone does not establish compatibility.
 **Prime Agent 0.9.8 cannot load this extension** because it removed the TS/JS runtime.
 Prime can use its own model settings.

@@ -1,5 +1,9 @@
 import type { Provider } from '@earendil-works/pi-ai';
-import type { ExtensionAPI, ExtensionCommandContext } from '@earendil-works/pi-coding-agent';
+import type {
+  ExtensionAPI,
+  ExtensionCommandContext,
+  ExtensionContext,
+} from '@earendil-works/pi-coding-agent';
 import { MacKeychain, validKey } from './keychain';
 import { gatewayUrl, messagesUrl, saveGateway, validateKey } from './gateway-config';
 import { inspectCredentialPolicy } from './credential-policy';
@@ -44,16 +48,21 @@ export function registerGateway(
     },
   };
   pi.registerProvider(provider);
+  let policyNotified = false;
+  const notifyPolicy = async (ctx: ExtensionContext, model = ctx.model) => {
+    if (model?.provider !== 'pipellm' || policyNotified) return;
+    policyNotified = true;
+    const policy = await inspect({ cwd: ctx.cwd });
+    if (policy.warnings.length) ctx.ui.notify(policy.warnings.join('\n'), 'warning');
+  };
   // Native provider registration refreshes availability asynchronously in Pi 1.0.2.
   // Await a fresh snapshot before startup model listing/selection completes.
   pi.on('session_start', async (_event, ctx) => {
-    const policy = await inspect({ cwd: ctx.cwd });
-    ctx.ui.notify(
-      policy.warnings.length ? policy.warnings.join('\n') : policy.recommendation,
-      policy.warnings.length ? 'warning' : 'info',
-    );
+    policyNotified = false;
     await ctx.modelRegistry.refresh({ allowNetwork: false });
+    await notifyPolicy(ctx);
   });
+  pi.on('model_select', async (event, ctx) => notifyPolicy(ctx, event.model));
   const interactive = (args: string, ctx: ExtensionCommandContext) => {
     if (args.trim()) {
       ctx.ui.notify(

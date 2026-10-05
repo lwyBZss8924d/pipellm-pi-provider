@@ -19,6 +19,8 @@ Discovery must honor access denial rather than fall back to a different item.
 
 ## Required properties
 
+- CLI entrypoints must never implicitly expose commands over HTTP. Bun execution must not
+  auto-serve an exported fetch handler. Explicit `--mcp` uses stdio only.
 - Keep keys out of arguments, ordinary TUI input/history, logs, public artifacts and Pi auth storage.
   Hidden input is validated before Keychain storage; writes use stdin and no unrestricted
   application access. Status/discovery never resolve passwords.

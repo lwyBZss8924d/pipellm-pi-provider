@@ -86,6 +86,7 @@ test('Pi startup surfaces the dotenv policy through the native TUI without revea
       {},
       {
         cwd: dir,
+        model: { provider: 'pipellm' },
         ui: { notify: (message: string) => notices.push(message) },
         modelRegistry: {
           refresh: async () => {

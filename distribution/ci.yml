@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-24.04, macos-15]
+        pi: ['1.0.2', '1.0.3']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +24,7 @@ jobs:
         with:
           bun-version: '1.3.14'
       - run: bun install --frozen-lockfile --ignore-scripts
-      - run: npm install --global @earendil-works/pi-coding-agent@1.0.2 --ignore-scripts
+      - run: npm install --global @earendil-works/pi-coding-agent@${{ matrix.pi }} --ignore-scripts
       - run: bun test tests
       - run: bun run typecheck
       - run: bun run format:check
@@ -33,7 +34,7 @@ jobs:
         working-directory: dist
       - uses: actions/upload-artifact@v4
         with:
-          name: pipellm-package-${{ matrix.os }}
+          name: pipellm-package-${{ matrix.os }}-pi-${{ matrix.pi }}
           path: |
             dist/*.tgz
             dist/*-install.sh

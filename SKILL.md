@@ -23,6 +23,6 @@ credential writes require authorization from the active task.
 output contains fixed warnings and flags, never values/paths. Checks do not modify files and
 cannot prove environment provenance. Incomplete inspection is reported.
 
-Pi 1.0.2 is tested. Compatible forks require its native extension/provider/command/TUI APIs;
+Pi 1.0.2 and 1.0.3 are tested. Compatible forks require its native extension/provider/command/TUI APIs;
 Prime Agent 0.9.8 cannot load JS extensions. Gateways requiring adaptive thinking need `minimal`
 or higher. 1Password storage/loading/discovery is planned, not implemented.

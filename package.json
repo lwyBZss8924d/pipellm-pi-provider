@@ -1,6 +1,6 @@
 {
   "name": "pipellm-pi-provider",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "private": true,
   "description": "PipeLLM provider for Pi with Anthropic Messages, macOS Keychain login, and a management CLI.",
   "type": "module",

@@ -33,10 +33,18 @@ licenses; the archive includes corresponding source and tests. No local/private 
 The embedded-archive installer checks its digest, uses a stable destination, delegates client
 registration and restores a prior installation if registration fails.
 
-Pi 1.0.2 is tested. Forks require the JavaScript loader, native provider, commands and TUI APIs;
+Pi 1.0.2 and 1.0.3 are tested. Forks require the JavaScript loader, native provider, commands and TUI APIs;
 Prime Agent 0.9.8 lacks that runtime. Keychain persistence requires macOS. Native thinking
 behavior is preserved: gateways requiring adaptive thinking need `minimal` or higher, since Pi
 `off` sends `disabled`. 1Password storage/loading/discovery remains future work.
+
+The CLI never starts an HTTP listener implicitly. Explicit `--mcp` uses stdio.
+macOS configuration uses an environment-first Keychain command for operation without the
+extension. Pi resolves it before extension auth, so Keychain-only requests can read the key
+twice and command presence can overstate model availability. This host limitation does not
+allow the extension to trust legacy Pi auth credentials. Configuration updates preserve
+non-authentication headers and file symlinks; private backups remain available until removed
+by the operator. Distribution tests build in temporary directories.
 
 ## Acceptance
 
